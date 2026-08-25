@@ -1,0 +1,15 @@
+{
+  "embed": {
+    "footerText": "Flowie • Florynx Labs",
+    "footerIconUrl": "https://cdn.discordapp.com/embed/avatars/0.png"
+  },
+  "economy": {
+    "defaultCurrency": "Flow"
+  },
+  "owners": {
+    "primaryOwnerId": "1409277100334252104",
+    "subOwnerIds": [
+      "123456789012345678"
+    ]
+  }
+}

@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id                 String   @id // Discord Guild ID
+  prefix             String   @default("!")
+  language           String   @default("fr") // fr | en
+  logChannelId       String?
+  welcomeEnabled     Boolean  @default(true)
+  welcomeChannelId   String?
+  welcomeMessage     String?  @default("Bienvenue {user} sur {server} ! Nous sommes désormais {membercount} membres.")
+  welcomeBgUrl       String?
+  leaveEnabled       Boolean  @default(true)
+  leaveChannelId     String?
+  leaveMessage       String?  @default("{user} a quitté {server}. Nous sommes désormais {membercount} membres.")
+  leaveBgUrl         String?
+  autoRoleId         String?
+  currencyName       String   @default("Flow")
+  warnThresholdMute  Int      @default(3)
+  warnThresholdBan   Int      @default(5)
+  antiRaidEnabled    Boolean  @default(false)
+  antiSpamEnabled    Boolean  @default(false)
+  ticketCategoryId   String?
+  ticketLogsChannelId String?
+  ticketStaffRoleId  String?
+  ownerUserId        String?
+  isLocked           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  members            Member[]
+  warnings           Warning[]
+  giveaways          Giveaway[]
+  transactions       Transaction[]
+  shopItems          ShopItem[]
+  tickets            Ticket[]
+  moderationCases    ModerationCase[]
+
+  @@index([ownerUserId, isLocked])
+  @@map("guilds")
+}
+
+model Member {
+  id          String   @id @default(uuid())
+  guildId     String
+  userId      String
+  balance     Int      @default(100)
+  bankBalance Int      @default(0)
+  xp          Int      @default(0)
+  dailyStreak Int      @default(0)
+  lastDaily   DateTime?
+  lastWork    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  inventory   InventoryItem[]
+  warnings    Warning[]
+  transactions Transaction[]
+  giveawayEntries GiveawayEntry[]
+
+  @@unique([guildId, userId])
+  @@map("members")
+}
+
+model Warning {
+  id          String   @id @default(uuid())
+  guildId     String
+  userId      String
+  moderatorId String
+  reason      String
+  createdAt   DateTime @default(now())
+
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  member      Member   @relation(fields: [guildId, userId], references: [guildId, userId], onDelete: Cascade)
+
+  @@map("warnings")
+}
+
+model Giveaway {
+  id             String   @id @default(uuid())
+  messageId      String?  @unique
+  guildId        String
+  channelId      String
+  hostId         String
+  prize          String
+  winnersCount   Int      @default(1)
+  requiredRoleId String?
+  endsAt         DateTime
+  ended          Boolean  @default(false)
+  winners        String[] @default([])
+  createdAt      DateTime @default(now())
+
+  guild          Guild           @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  entries        GiveawayEntry[]
+
+  @@map("giveaways")
+}
+
+model GiveawayEntry {
+  id         String   @id @default(uuid())
+  giveawayId String
+  guildId    String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  giveaway   Giveaway @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+  member     Member   @relation(fields: [guildId, userId], references: [guildId, userId], onDelete: Cascade)
+
+  @@unique([giveawayId, userId])
+  @@map("giveaway_entries")
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  guildId     String
+  userId      String
+  type        String   // DAILY | WORK | PAY | DEPOSIT | WITHDRAW | SHOP_BUY | GAME_WIN | GAME_LOSS
+  amount      Int
+  description String
+  createdAt   DateTime @default(now())
+
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  member      Member   @relation(fields: [guildId, userId], references: [guildId, userId], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model ShopItem {
+  id          String   @id @default(uuid())
+  guildId     String
+  name        String
+  description String
+  price       Int
+  roleId      String?
+  createdAt   DateTime @default(now())
+
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  inventories InventoryItem[]
+
+  @@map("shop_items")
+}
+
+model InventoryItem {
+  id         String   @id @default(uuid())
+  memberId   String
+  shopItemId String
+  purchasedAt DateTime @default(now())
+
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  shopItem   ShopItem @relation(fields: [shopItemId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_items")
+}
+
+model TriviaQuestion {
+  id        String   @id @default(uuid())
+  category  String   @default("General")
+  question  String
+  options   String[]
+  answer    String
+  reward    Int      @default(50)
+  createdAt DateTime @default(now())
+
+  @@map("trivia_questions")
+}
+
+model TrackedBot {
+  id             String        @id @default(cuid())
+  guildId        String
+  botId          String
+  alertChannelId String?
+  addedBy        String
+  createdAt      DateTime      @default(now())
+  events         UptimeEvent[]
+
+  @@unique([guildId, botId])
+  @@map("tracked_bots")
+}
+
+model UptimeEvent {
+  id           String     @id @default(cuid())
+  trackedBotId String
+  trackedBot   TrackedBot @relation(fields: [trackedBotId], references: [id], onDelete: Cascade)
+  status       String     // online | idle | dnd | offline | invisible | not_found
+  timestamp    DateTime   @default(now())
+
+  @@index([trackedBotId, timestamp])
+  @@map("uptime_events")
+}
+
+model Ticket {
+  id              String    @id @default(cuid())
+  guildId         String
+  channelId       String    @unique
+  ownerId         String
+  type            String    @default("General")
+  status          String    @default("open") // open | closed
+  claimedBy       String?
+  firstResponseAt DateTime?
+  createdAt       DateTime  @default(now())
+  closedAt        DateTime?
+  closedBy        String?
+  closeReason     String?
+
+  guild           Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, ownerId, status])
+  @@map("tickets")
+}
+
+model ModerationCase {
+  id          String   @id @default(cuid())
+  guildId     String
+  targetId    String
+  moderatorId String
+  type        String   // WARN | MUTE | UNMUTE | KICK | BAN | UNBAN | SOFTBAN | SLOWMODE | NICKNAME | PURGE_USER
+  reason      String   @default("Aucune raison spécifiée")
+  createdAt   DateTime @default(now())
+
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, targetId])
+  @@map("moderation_cases")
+}
+
+model HangmanWord {
+  id        String   @id @default(uuid())
+  word      String
+  category  String   @default("Général")
+  hint      String?
+  createdAt DateTime @default(now())
+
+  @@map("hangman_words")
+}
+
+model Blacklist {
+  id        String   @id @default(cuid())
+  type      String   // user | guild
+  targetId  String   @unique // userId or guildId
+  reason    String   @default("Aucune raison spécifiée")
+  addedAt   DateTime @default(now())
+
+  @@map("blacklists")
+}
