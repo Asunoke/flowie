@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits, Partials, Collection, Events } from 'discord.js';
+import { initMusicService } from './services/musicService.js';
 import { config } from './config/index.js';
 import { connectDB } from './database/db.js';
 import { loadCommands } from './utils/commandLoader.js';
@@ -9,6 +10,7 @@ import { handlePresenceUpdate } from './events/presenceUpdate.js';
 import { handleGuildMemberAdd } from './events/guildMemberAdd.js';
 import { handleGuildMemberRemove } from './events/guildMemberRemove.js';
 import { handleGuildCreate } from './events/guildCreate.js';
+import { handleGuildDelete } from './events/guildDelete.js';
 import { handleChannelDelete } from './events/channelDelete.js';
 import { startHealthServer } from './utils/healthServer.js';
 import { logger } from './utils/logger.js';
@@ -31,6 +33,7 @@ export const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.GuildVoiceStates, // Required for Lavalink voice connections
   ],
   partials: [
     Partials.Message,
@@ -69,7 +72,11 @@ async function main() {
   client.on('guildMemberAdd', (member) => handleGuildMemberAdd(member));
   client.on('guildMemberRemove', (member) => handleGuildMemberRemove(member));
   client.on('guildCreate', (guild) => handleGuildCreate(guild));
+  client.on('guildDelete', (guild) => handleGuildDelete(guild));
   client.on('channelDelete', (channel) => handleChannelDelete(channel));
+
+  // Initialize Lavalink music service BEFORE login (Shoukaku requirement)
+  initMusicService(client);
 
   // Login if token is provided
   if (config.token && config.token !== 'mock_discord_token_for_dev') {

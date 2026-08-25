@@ -29,8 +29,11 @@ model Guild {
   ticketCategoryId   String?
   ticketLogsChannelId String?
   ticketStaffRoleId  String?
+  ticketLimit        Int      @default(1)
   ownerUserId        String?
   isLocked           Boolean  @default(false)
+  levelingEnabled    Boolean  @default(true)
+  excludedXpChannelIds String[] @default([])
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -249,3 +252,70 @@ model Blacklist {
 
   @@map("blacklists")
 }
+
+model PremiumWhitelist {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  maxGuilds Int       @default(1) // -1 for unlimited
+  addedBy   String
+  reason    String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  @@map("premium_whitelists")
+}
+
+model MemberXP {
+  id            String    @id @default(cuid())
+  guildId       String
+  userId        String
+  xp            Int       @default(0)
+  level         Int       @default(0)
+  lastMessageAt DateTime? @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([guildId, userId])
+  @@index([guildId, xp(sort: Desc)])
+  @@map("member_xp")
+}
+
+model LevelRole {
+  id        String   @id @default(cuid())
+  guildId   String
+  level     Int
+  roleId    String
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, level])
+  @@map("level_roles")
+}
+
+model MusicSettings {
+  id              String   @id @default(cuid())
+  guildId         String   @unique
+  djRoleId        String?
+  alwaysOnEnabled Boolean  @default(false)
+  defaultVolume   Int      @default(80)
+  maxQueueSize    Int      @default(200)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("music_settings")
+}
+
+model Playlist {
+  id        String   @id @default(cuid())
+  userId    String
+  guildId   String
+  name      String
+  // JSON Array<{ encoded: string, title: string, author: string, uri: string, duration: number }>
+  tracks    Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, guildId, name])
+  @@index([userId, guildId])
+  @@map("playlists")
+}
+

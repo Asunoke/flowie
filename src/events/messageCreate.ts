@@ -9,6 +9,7 @@ import { wordChainSessions } from '../commands/games/wordchain.js';
 
 import { BlacklistService } from '../services/blacklistService.js';
 import { handleOwnerCommand } from '../owner-commands/ownerHandler.js';
+import { LevelingService } from '../services/levelingService.js';
 
 export async function handleMessageCreate(message: Message) {
   if (message.author.bot) return;
@@ -24,6 +25,11 @@ export async function handleMessageCreate(message: Message) {
 
   // Record first staff response in ticket channels
   TicketService.recordFirstResponse(message.channel.id, message.author.id).catch(() => null);
+
+  // Passive Leveling XP Handler
+  if (message.member) {
+    LevelingService.handleMessageXP(message.guild.id, message.member, message.channel.id).catch(() => null);
+  }
 
   // WordChain Live Validation Handler
   const session = wordChainSessions.get(message.channel.id);

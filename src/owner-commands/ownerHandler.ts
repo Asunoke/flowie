@@ -3,6 +3,7 @@ import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { EmbedService } from '../services/embedService.js';
 import { BlacklistService } from '../services/blacklistService.js';
+import { PlanService } from '../services/planService.js';
 import { loadCommands } from '../utils/commandLoader.js';
 
 export async function handleOwnerCommand(message: Message): Promise<boolean> {
@@ -219,6 +220,59 @@ export async function handleOwnerCommand(message: Message): Promise<boolean> {
           await message.reply(`✅ **\`${targetId}\` retiré de la liste noire.**`);
           success = true;
           resultSummary = `Blacklist remove ${targetId}`;
+        }
+        break;
+      }
+
+      // ─── 6b. PREMIUM ─────────────────────────────────────────────────────
+      case 'premium': {
+        const action = args[0]?.toLowerCase();
+        const targetUserId = args[1];
+
+        if (!action || !['add', 'remove', 'check'].includes(action)) {
+          await message.reply('❌ Usage: `!!premium <add|remove|check> <userId> [maxGuilds] [duree_jours]`');
+          return true;
+        }
+
+        if (!targetUserId) {
+          await message.reply('❌ Veuillez spécifier l\'ID Discord de l\'utilisateur.');
+          return true;
+        }
+
+        if (action === 'add') {
+          const maxGuilds = parseInt(args[2], 10) || 5;
+          const durationDays = args[3] ? parseInt(args[3], 10) : undefined;
+
+          await PlanService.addPremium(targetUserId, maxGuilds, message.author.id, durationDays);
+          const durStr = durationDays ? `${durationDays} jours` : 'Illimitée';
+          await message.reply(
+            `✨ **\`${targetUserId}\` a été ajouté à la liste Premium !**\n` +
+              `• **Nombre max de serveurs** : \`${maxGuilds === -1 ? 'Illimité (-1)' : maxGuilds}\`\n` +
+              `• **Durée** : \`${durStr}\``
+          );
+          success = true;
+          resultSummary = `Premium add ${targetUserId} (max: ${maxGuilds})`;
+        } else if (action === 'remove') {
+          await PlanService.removePremium(targetUserId);
+          await message.reply(`✅ **\`${targetUserId}\` retiré de la liste Premium (repasse au plan Free : 1 serveur max).**`);
+          success = true;
+          resultSummary = `Premium remove ${targetUserId}`;
+        } else if (action === 'check') {
+          const quota = await PlanService.getQuotaInfo(targetUserId);
+          const expStr = quota.expiresAt ? quota.expiresAt.toLocaleDateString('fr-FR') : 'Permanente';
+          const embed = EmbedService.gold(
+            `✨ Statut Premium — User \`${targetUserId}\``,
+            `Informations du plan d'utilisation`
+          ).addFields(
+            { name: '⭐ Plan', value: quota.isPremium ? '`Premium`' : '`Free`', inline: true },
+            { name: '🏰 Serveurs autorisés', value: `\`${quota.maxGuilds === -1 ? 'Illimité' : quota.maxGuilds}\``, inline: true },
+            { name: '📊 Serveurs comptés', value: `\`${quota.activeCount}\``, inline: true },
+            { name: '📅 Expiration', value: `\`${expStr}\``, inline: true }
+          );
+
+          await message.reply({ embeds: [embed] });
+          success = true;
+          resultSummary = `Premium check ${targetUserId}`;
         }
         break;
       }

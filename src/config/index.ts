@@ -87,5 +87,19 @@ export const config = {
     dbConnectionLimit: process.env.DATABASE_CONNECTION_LIMIT || '20',
     healthPort: process.env.HEALTH_PORT ? parseInt(process.env.HEALTH_PORT, 10) : 3000,
     configCacheTtl: process.env.CONFIG_CACHE_TTL ? parseInt(process.env.CONFIG_CACHE_TTL, 10) : 600,
+    lockedMode: (process.env.LOCKED_MODE as 'leave' | 'stay_disabled') || 'leave',
+    officialDiscordInvite: process.env.OFFICIAL_DISCORD_INVITE || 'https://discord.gg/florynxlabs',
+  },
+  lavalink: {
+    host: process.env.LAVALINK_HOST || 'localhost',
+    port: process.env.LAVALINK_PORT ? parseInt(process.env.LAVALINK_PORT, 10) : 2333,
+    // Password is kept opaque — never log config.lavalink.password
+    password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
+    secure: process.env.LAVALINK_SECURE === 'true',
+  },
+  music: {
+    queueLimit: process.env.MUSIC_QUEUE_LIMIT ? parseInt(process.env.MUSIC_QUEUE_LIMIT, 10) : 200,
+    idleTimeoutSec: process.env.MUSIC_IDLE_TIMEOUT ? parseInt(process.env.MUSIC_IDLE_TIMEOUT, 10) : 300,
   },
 };
+

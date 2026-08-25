@@ -12,7 +12,23 @@ export interface Command {
     | SlashCommandOptionsOnlyBuilder
     | SlashCommandSubcommandsOnlyBuilder
     | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
-  category: 'core' | 'moderation' | 'management' | 'giveaways' | 'games' | 'economy' | 'uptimer' | 'tickets';
+  category:
+    | 'core'
+    | 'moderation'
+    | 'management'
+    | 'giveaways'
+    | 'games'
+    | 'economy'
+    | 'uptimer'
+    | 'tickets'
+    | 'leveling'
+    | 'news'
+    | 'automod'
+    | 'starboard'
+    | 'suggestions'
+    | 'tags'
+    | 'utility'
+    | 'music';
   userPermissions?: PermissionResolvable[];
   botPermissions?: PermissionResolvable[];
   cooldown?: number; // seconds

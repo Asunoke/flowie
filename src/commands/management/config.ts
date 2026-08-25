@@ -3,6 +3,7 @@ import { Command } from '../../types/command.js';
 import { prisma } from '../../database/db.js';
 import { EmbedService } from '../../services/embedService.js';
 import { GuildConfigService } from '../../services/guildConfigService.js';
+import { getMusicSettings } from '../../services/musicService.js';
 
 export const command: Command = {
   data: new SlashCommandBuilder()
@@ -90,6 +91,27 @@ export const command: Command = {
             .setDescription('Nombre max de tickets par membre')
             .setMinValue(1)
             .setMaxValue(10)
+            .setRequired(true)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('music-dj-role')
+        .setDescription('Définir le rôle DJ requis pour les commandes de contrôle musical (skip/stop/volume)')
+        .addRoleOption((opt) =>
+          opt.setName('role').setDescription('Le rôle DJ (laisse vide pour retirer la restriction)').setRequired(false)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('music-volume')
+        .setDescription('Définir le volume musical par défaut pour ce serveur (0–150)')
+        .addIntegerOption((opt) =>
+          opt
+            .setName('niveau')
+            .setDescription('Volume par défaut (0–150)')
+            .setMinValue(0)
+            .setMaxValue(150)
             .setRequired(true)
         )
     ),
@@ -241,6 +263,39 @@ export const command: Command = {
       });
       await interaction.reply({
         embeds: [EmbedService.success('Anti-Raid', `Protection anti-raid : ${active ? '**Activée**' : '**Désactivée**'}.`)],
+      });
+      return;
+    }
+
+    if (subcommand === 'music-dj-role') {
+      const role = interaction.options.getRole('role');
+      await prisma.musicSettings.upsert({
+        where: { guildId: interaction.guild.id },
+        create: { guildId: interaction.guild.id, djRoleId: role?.id ?? null },
+        update: { djRoleId: role?.id ?? null },
+      });
+      await interaction.reply({
+        embeds: [
+          EmbedService.success(
+            'Rôle DJ configuré',
+            role
+              ? `Le rôle **${role}** est désormais requis pour contrôler la musique (skip/stop/volume).`
+              : 'La restriction de rôle DJ a été retirée. Tous les membres peuvent contrôler la musique.'
+          ),
+        ],
+      });
+      return;
+    }
+
+    if (subcommand === 'music-volume') {
+      const volume = interaction.options.getInteger('niveau', true);
+      await prisma.musicSettings.upsert({
+        where: { guildId: interaction.guild.id },
+        create: { guildId: interaction.guild.id, defaultVolume: volume },
+        update: { defaultVolume: volume },
+      });
+      await interaction.reply({
+        embeds: [EmbedService.success('Volume par défaut', `🔊 Le volume par défaut pour la musique a été réglé à **${volume}%**.`)],
       });
       return;
     }
