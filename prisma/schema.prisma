@@ -319,3 +319,18 @@ model Playlist {
   @@map("playlists")
 }
 
+model NewsSubscription {
+  id               String   @id @default(cuid())
+  guildId          String
+  channelId        String
+  feedUrl          String
+  lastPostedItemId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([guildId, channelId, feedUrl])
+  @@index([guildId, channelId])
+  @@map("news_subscriptions")
+}
+
+

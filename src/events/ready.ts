@@ -3,6 +3,7 @@ import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 import { GiveawayService } from '../services/giveawayService.js';
 import { loadCommands } from '../utils/commandLoader.js';
+import { NewsService } from '../services/newsService.js';
 
 export async function handleReady(client: Client) {
   logger.info(`[ONLINE] Flowie is online! Logged in as ${client.user?.tag}`);
@@ -34,6 +35,9 @@ export async function handleReady(client: Client) {
 
   // Restore active giveaways from DB
   await GiveawayService.restoreGiveaways(client);
+
+  // Start RSS News Feed scheduler
+  NewsService.startScheduler(client);
 
   client.user?.setActivity(`${config.bot.signature} | /help`, {
     type: ActivityType.Watching,

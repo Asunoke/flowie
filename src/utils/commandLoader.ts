@@ -23,7 +23,9 @@ export async function loadCommands(): Promise<Collection<string, Command>> {
     const categoryPath = path.join(commandsPath, category);
     if (!fs.statSync(categoryPath).isDirectory()) continue;
 
-    const files = fs.readdirSync(categoryPath).filter((f) => f.endsWith('.ts') || f.endsWith('.js'));
+    const files = fs
+      .readdirSync(categoryPath)
+      .filter((f) => (f.endsWith('.ts') || f.endsWith('.js')) && !f.startsWith('_'));
 
     for (const file of files) {
       const filePath = path.join(categoryPath, file);
