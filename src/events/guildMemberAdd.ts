@@ -13,7 +13,21 @@ export async function handleGuildMemberAdd(member: GuildMember) {
 
     if (!guildConfig) return;
 
-    // 1. Anti-Raid Detection (e.g. > 10 joins in 10 seconds)
+    // 1. Anti-Bot Verification Check
+    const verifySettings = await prisma.verifySettings.findUnique({
+      where: { guildId: member.guild.id },
+    });
+
+    if (verifySettings && verifySettings.enabled && verifySettings.unverifiedRoleId) {
+      const unverifiedRole = member.guild.roles.cache.get(verifySettings.unverifiedRoleId);
+      if (unverifiedRole) {
+        await member.roles.add(unverifiedRole).catch((err) => {
+          logger.error({ err }, `Failed to assign unverified role ${verifySettings.unverifiedRoleId} to ${member.user.tag}`);
+        });
+      }
+    }
+
+    // 2. Anti-Raid Detection (e.g. > 10 joins in 10 seconds)
     if (guildConfig.antiRaidEnabled) {
       const raidKey = `antiraid:${member.guild.id}`;
       const rawCount = await redis.get(raidKey);

@@ -28,7 +28,9 @@ export interface Command {
     | 'suggestions'
     | 'tags'
     | 'utility'
-    | 'music';
+    | 'music'
+    | 'verify'
+    | 'tempvoice';
   userPermissions?: PermissionResolvable[];
   botPermissions?: PermissionResolvable[];
   cooldown?: number; // seconds

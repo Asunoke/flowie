@@ -333,4 +333,66 @@ model NewsSubscription {
   @@map("news_subscriptions")
 }
 
+model VerifySettings {
+  guildId          String   @id
+  verifyChannelId  String
+  verifiedRoleId   String
+  unverifiedRoleId String
+  enabled          Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
+  @@map("verify_settings")
+}
+
+model TempVoiceSettings {
+  guildId          String   @id
+  triggerChannelId String
+  categoryId       String
+  nameTemplate     String   @default("🔊 Salon de {user}")
+  maxChannels      Int      @default(50)
+  enabled          Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("temp_voice_settings")
+}
+
+model TempVoiceChannel {
+  id        String   @id @default(cuid())
+  guildId   String
+  channelId String   @unique
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  @@index([guildId, ownerId])
+  @@map("temp_voice_channels")
+}
+
+model InviteJoin {
+  id          String   @id @default(cuid())
+  guildId     String
+  memberId    String
+  inviterId   String?
+  inviteCode  String?
+  joinType    String   @default("normal") // normal | vanity | widget | unknown
+  leftEarly   Boolean  @default(false)
+  joinedAt    DateTime @default(now())
+
+  @@index([guildId, memberId])
+  @@index([guildId, inviterId])
+  @@map("invite_joins")
+}
+
+model InviteBonus {
+  id        String   @id @default(cuid())
+  guildId   String
+  userId    String
+  amount    Int      @default(0)
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guildId, userId])
+  @@map("invite_bonuses")
+}

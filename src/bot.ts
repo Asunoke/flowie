@@ -12,6 +12,7 @@ import { handleGuildMemberRemove } from './events/guildMemberRemove.js';
 import { handleGuildCreate } from './events/guildCreate.js';
 import { handleGuildDelete } from './events/guildDelete.js';
 import { handleChannelDelete } from './events/channelDelete.js';
+import { handleVoiceStateUpdate } from './events/voiceStateUpdate.js';
 import { startHealthServer } from './utils/healthServer.js';
 import { logger } from './utils/logger.js';
 import { Command } from './types/command.js';
@@ -34,6 +35,7 @@ export const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildVoiceStates, // Required for Lavalink voice connections
+    GatewayIntentBits.GuildInvites, // Required for Invite Tracking
   ],
   partials: [
     Partials.Message,
@@ -74,6 +76,9 @@ async function main() {
   client.on('guildCreate', (guild) => handleGuildCreate(guild));
   client.on('guildDelete', (guild) => handleGuildDelete(guild));
   client.on('channelDelete', (channel) => handleChannelDelete(channel));
+  client.on('voiceStateUpdate', (oldState, newState) =>
+    handleVoiceStateUpdate(oldState, newState)
+  );
 
   // Initialize Lavalink music service BEFORE login (Shoukaku requirement)
   initMusicService(client);
