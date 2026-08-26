@@ -9,6 +9,7 @@ import {
 import { GuildConfigService } from '../services/guildConfigService.js';
 import { PlanService } from '../services/planService.js';
 import { EmbedService } from '../services/embedService.js';
+import { InviteService } from '../services/inviteService.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 
@@ -18,6 +19,9 @@ import { config } from '../config/index.js';
 export async function handleGuildCreate(guild: Guild) {
   try {
     logger.info(`[GUILD_JOIN] Flowie joined server "${guild.name}" (${guild.id}) — Member Count: ${guild.memberCount}`);
+
+    // Cache invites for Invite Tracking
+    await InviteService.cacheGuildInvites(guild);
 
     // 1. Identify owner or bot inviter from Audit Logs (fallback to guild.ownerId)
     let ownerUserId = guild.ownerId;

@@ -3,15 +3,19 @@ import { UptimeService } from '../services/uptimerService.js';
 import { WelcomeCardService } from '../services/welcomeCardService.js';
 import { EmbedService } from '../services/embedService.js';
 import { prisma } from '../database/db.js';
+import { InviteService } from '../services/inviteService.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 
 /**
- * Handles guildMemberRemove for both Uptimer (tracked bots) and Leave System (members leaving).
+ * Handles guildMemberRemove for Uptimer, Leave System, and Invite Tracking (left early check).
  */
 export async function handleGuildMemberRemove(member: GuildMember | PartialGuildMember) {
   try {
     const guildId = member.guild.id;
+
+    // 0. Invite Tracking (Check if member left < 10 mins after joining)
+    await InviteService.trackMemberLeave(guildId, member.id);
 
     // 1. Leave System Message & Banner Card
     try {

@@ -9,6 +9,7 @@ import { wordChainSessions } from '../commands/games/wordchain.js';
 
 import { BlacklistService } from '../services/blacklistService.js';
 import { handleOwnerCommand } from '../owner-commands/ownerHandler.js';
+import { CountingService } from '../services/countingService.js';
 import { LevelingService } from '../services/levelingService.js';
 
 export async function handleMessageCreate(message: Message) {
@@ -22,6 +23,10 @@ export async function handleMessageCreate(message: Message) {
   const blacklist = await BlacklistService.isBlacklisted(message.author.id, message.guild?.id);
   if (blacklist.blacklisted) return;
   if (!message.guild || !message.channel.isTextBased() || !('send' in message.channel)) return;
+
+  // Counting Game Live Validation Handler
+  const isCountingMessage = await CountingService.handleMessage(message);
+  if (isCountingMessage) return;
 
   // Record first staff response in ticket channels
   TicketService.recordFirstResponse(message.channel.id, message.author.id).catch(() => null);

@@ -5,8 +5,14 @@ import { GiveawayService } from '../services/giveawayService.js';
 import { loadCommands } from '../utils/commandLoader.js';
 import { NewsService } from '../services/newsService.js';
 import { TempVoiceService } from '../services/tempVoiceService.js';
+import { InviteService } from '../services/inviteService.js';
+
+import { StreamNotifyService } from '../services/streamNotifyService.js';
+import { BirthdayService } from '../services/birthdayService.js';
 
 export async function handleReady(client: Client) {
+
+
   logger.info(`[ONLINE] Flowie is online! Logged in as ${client.user?.tag}`);
 
   // Auto-deploy slash commands to Discord on ready
@@ -42,6 +48,19 @@ export async function handleReady(client: Client) {
 
   // Start RSS News Feed scheduler
   NewsService.startScheduler(client);
+
+  // Start Stream Notification scheduler (Twitch & YouTube)
+  StreamNotifyService.startScheduler(client);
+
+  // Start Daily Birthday scheduler
+  BirthdayService.startScheduler(client);
+
+
+  // Initialize Invite Tracking Redis cache on boot & start 10-minute refresh
+  for (const [, guild] of client.guilds.cache) {
+    await InviteService.cacheGuildInvites(guild);
+  }
+  InviteService.startPeriodicRefresh(client);
 
   client.user?.setActivity(`${config.bot.signature} | /help`, {
     type: ActivityType.Watching,

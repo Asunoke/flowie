@@ -13,6 +13,8 @@ import { handleGuildCreate } from './events/guildCreate.js';
 import { handleGuildDelete } from './events/guildDelete.js';
 import { handleChannelDelete } from './events/channelDelete.js';
 import { handleVoiceStateUpdate } from './events/voiceStateUpdate.js';
+import { handleInviteCreate } from './events/inviteCreate.js';
+import { handleInviteDelete } from './events/inviteDelete.js';
 import { startHealthServer } from './utils/healthServer.js';
 import { logger } from './utils/logger.js';
 import { Command } from './types/command.js';
@@ -79,6 +81,8 @@ async function main() {
   client.on('voiceStateUpdate', (oldState, newState) =>
     handleVoiceStateUpdate(oldState, newState)
   );
+  client.on('inviteCreate', (invite) => handleInviteCreate(invite));
+  client.on('inviteDelete', (invite) => handleInviteDelete(invite));
 
   // Initialize Lavalink music service BEFORE login (Shoukaku requirement)
   initMusicService(client);

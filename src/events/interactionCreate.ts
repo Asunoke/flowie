@@ -23,6 +23,9 @@ import { TempVoiceService } from '../services/tempVoiceService.js';
 import { redis } from '../services/redisService.js';
 import { logger } from '../utils/logger.js';
 
+import { ReportService } from '../services/reportService.js';
+import { ApplyService, FormQuestion } from '../services/applyService.js';
+
 import { BlacklistService } from '../services/blacklistService.js';
 
 export async function handleInteractionCreate(
@@ -35,6 +38,260 @@ export async function handleInteractionCreate(
     if (blacklist.blacklisted) {
       return; // Silent ignore (no response)
     }
+
+    // ─── APPLICATION BUTTON & MODAL INTERACTIONS ──────────────────────────
+
+    if (interaction.isButton() && interaction.customId.startsWith('apply_start:')) {
+      const position = interaction.customId.split(':')[1];
+      if (!interaction.guildId || !position) return;
+
+      const form = await ApplyService.getForm(interaction.guildId, position);
+      if (!form) {
+        await interaction.reply({
+          embeds: [EmbedService.error('Erreur', 'Ce formulaire de candidature n\'existe plus.')],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      const questions = (form.questions as unknown as FormQuestion[]) || [];
+      if (questions.length === 0) {
+        await interaction.reply({
+          embeds: [EmbedService.error('Erreur', 'Aucune question n\'est configurée pour ce formulaire.')],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      const totalSteps = Math.ceil(questions.length / 5);
+      const step1Questions = questions.slice(0, 5);
+
+      const modal = new ModalBuilder()
+        .setCustomId(`apply_modal_submit:${position}:1:${totalSteps}`)
+        .setTitle(`Candidature ${position} (Étape 1/${totalSteps})`);
+
+      for (const q of step1Questions) {
+        const input = new TextInputBuilder()
+          .setCustomId(q.id)
+          .setLabel(q.label.length > 45 ? q.label.slice(0, 42) + '...' : q.label)
+          .setStyle(q.style === 'short' ? TextInputStyle.Short : TextInputStyle.Paragraph)
+          .setRequired(q.required ?? true)
+          .setMaxLength(1000);
+
+        modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(input));
+      }
+
+      await interaction.showModal(modal);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('apply_continue:')) {
+      const parts = interaction.customId.split(':');
+      const position = parts[1];
+      const step = parseInt(parts[2], 10);
+      const totalSteps = parseInt(parts[3], 10);
+
+      if (!interaction.guildId || !position) return;
+
+      const form = await ApplyService.getForm(interaction.guildId, position);
+      if (!form) return;
+
+      const questions = (form.questions as unknown as FormQuestion[]) || [];
+      const startIndex = (step - 1) * 5;
+      const stepQuestions = questions.slice(startIndex, startIndex + 5);
+
+      const modal = new ModalBuilder()
+        .setCustomId(`apply_modal_submit:${position}:${step}:${totalSteps}`)
+        .setTitle(`Candidature ${position} (Étape ${step}/${totalSteps})`);
+
+      for (const q of stepQuestions) {
+        const input = new TextInputBuilder()
+          .setCustomId(q.id)
+          .setLabel(q.label.length > 45 ? q.label.slice(0, 42) + '...' : q.label)
+          .setStyle(q.style === 'short' ? TextInputStyle.Short : TextInputStyle.Paragraph)
+          .setRequired(q.required ?? true)
+          .setMaxLength(1000);
+
+        modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(input));
+      }
+
+      await interaction.showModal(modal);
+      return;
+    }
+
+    if (interaction.isModalSubmit() && interaction.customId.startsWith('apply_modal_submit:')) {
+      const parts = interaction.customId.split(':');
+      const position = parts[1];
+      const step = parseInt(parts[2], 10);
+      const totalSteps = parseInt(parts[3], 10);
+
+      if (!interaction.guildId || !position) return;
+
+      const form = await ApplyService.getForm(interaction.guildId, position);
+      if (!form) return;
+
+      const questions = (form.questions as unknown as FormQuestion[]) || [];
+      const draftKey = `apply:draft:${interaction.guildId}:${interaction.user.id}:${position}`;
+
+      // Get existing draft answers from Redis
+      const existingDraftRaw = await redis.get(draftKey);
+      const answersMap: Record<string, string> = existingDraftRaw ? JSON.parse(existingDraftRaw) : {};
+
+      // Collect current step answers
+      const startIndex = (step - 1) * 5;
+      const stepQuestions = questions.slice(startIndex, startIndex + 5);
+
+      for (const q of stepQuestions) {
+        const val = interaction.fields.getTextInputValue(q.id);
+        answersMap[q.label] = val;
+      }
+
+      if (step < totalSteps) {
+        // Save intermediate draft and invite candidate to continue
+        await redis.set(draftKey, JSON.stringify(answersMap), 'EX', 1800);
+
+        const nextStep = step + 1;
+        const continueBtn = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`apply_continue:${position}:${nextStep}:${totalSteps}`)
+            .setLabel(`Continuer vers l'étape ${nextStep}/${totalSteps}`)
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji('➡️')
+        );
+
+        await interaction.reply({
+          embeds: [
+            EmbedService.success(
+              `Étape ${step}/${totalSteps} validée !`,
+              `Cliquez sur le bouton ci-dessous pour compléter la suite de votre candidature pour le poste de **${position}**.`
+            ),
+          ],
+          components: [continueBtn],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      // Final step completed! Submit application
+      const reviewChannel = interaction.client.channels.cache.get(form.reviewChannelId);
+      if (!reviewChannel || !reviewChannel.isTextBased() || !('send' in reviewChannel)) {
+        await interaction.reply({
+          embeds: [EmbedService.error('Erreur', 'Le salon de review staff pour cette candidature est introuvable.')],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      await ApplyService.submitApplication(
+        interaction.guildId,
+        position,
+        interaction.user.id,
+        answersMap,
+        reviewChannel as TextChannel
+      );
+
+      // Clean up Redis draft
+      await redis.del(draftKey);
+
+      await interaction.reply({
+        embeds: [
+          EmbedService.success(
+            '🎉 Candidature transmise !',
+            `Votre candidature pour le poste **${position}** a bien été envoyée à l'équipe staff.\n` +
+              `Vous recevrez une notification directe lorsqu'une décision sera prise.`
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('apply_review_')) {
+      const parts = interaction.customId.split(':');
+      const action = parts[0];
+      const appId = parts[1];
+
+      if (!appId) return;
+
+      const newStatus =
+        action === 'apply_review_accept'
+          ? 'accepted'
+          : action === 'apply_review_reject'
+          ? 'rejected'
+          : 'interview';
+
+      try {
+        await ApplyService.reviewApplication(
+          appId,
+          interaction.user.id,
+          newStatus,
+          interaction.client,
+          interaction.message
+        );
+
+        await interaction.reply({
+          embeds: [
+            EmbedService.success(
+              'Décision enregistrée',
+              `La candidature a été marquée comme **${
+                newStatus === 'accepted' ? 'Acceptée' : newStatus === 'rejected' ? 'Refusée' : 'En entretien'
+              }**.`
+            ),
+          ],
+          flags: MessageFlags.Ephemeral,
+        });
+      } catch (err: any) {
+        await interaction.reply({
+          embeds: [EmbedService.error('Erreur', err.message || 'Impossible de traiter cette candidature.')],
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('report_action_')) {
+      const parts = interaction.customId.split(':');
+      const action = parts[0];
+      const reportId = parts[1];
+
+      if (!reportId || !interaction.guild) return;
+
+      const actType =
+        action === 'report_action_warn'
+          ? 'warn'
+          : action === 'report_action_mute'
+          ? 'mute'
+          : 'ignore';
+
+      try {
+        await ReportService.handleReportAction(
+          reportId,
+          interaction.user.id,
+          actType,
+          interaction.guild,
+          interaction.message
+        );
+
+        await interaction.reply({
+          embeds: [
+            EmbedService.success(
+              'Action effectuée',
+              `Le signalement a été marqué comme **${
+                actType === 'warn' ? 'Averti' : actType === 'mute' ? 'Muté (1h)' : 'Ignoré'
+              }**.`
+            ),
+          ],
+          flags: MessageFlags.Ephemeral,
+        });
+      } catch (err: any) {
+        await interaction.reply({
+          embeds: [EmbedService.error('Erreur', err.message || 'Impossible de traiter ce signalement.')],
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+      return;
+    }
+
 
     // ─── TEMP VOICE BUTTON & MODAL INTERACTIONS ───────────────────────────
 
@@ -615,7 +872,41 @@ export async function handleInteractionCreate(
       return;
     }
 
+    // ─── CONTEXT MENU COMMANDS (Message / User) ───────────────────────────
+    if (interaction.isMessageContextMenuCommand() || interaction.isUserContextMenuCommand()) {
+      const command = commands.get(interaction.commandName);
+      if (!command) return;
+
+      const cooldownKey = `cooldown:${interaction.user.id}:${command.data.name}`;
+      const cooldownTime = command.cooldown || 3;
+      const { onCooldown, remainingSeconds } = await CooldownService.checkCooldown(cooldownKey, cooldownTime);
+
+      if (onCooldown) {
+        await interaction.reply({
+          content: `⏳ Patientez \`${remainingSeconds}s\` avant de réutiliser ce menu.`,
+          ephemeral: true,
+        }).catch(() => null);
+        return;
+      }
+
+      await CooldownService.setCooldown(cooldownKey, cooldownTime);
+
+      try {
+        await (command as any).execute(interaction);
+      } catch (err: any) {
+        logger.error({ err, command: command.data.name }, '[CONTEXT MENU ERROR]');
+        const reply = { content: '❌ Une erreur est survenue.', ephemeral: true as const };
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(reply).catch(() => null);
+        } else {
+          await interaction.reply(reply).catch(() => null);
+        }
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
+
 
     const command = commands.get(interaction.commandName);
     if (!command) {

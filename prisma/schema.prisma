@@ -396,3 +396,153 @@ model InviteBonus {
   @@unique([guildId, userId])
   @@map("invite_bonuses")
 }
+
+model StreamSubscription {
+  id             String   @id @default(cuid())
+  guildId        String
+  channelId      String
+  platform       String   // "twitch" | "youtube"
+  targetHandle   String
+  targetId       String?
+  customMessage  String?
+  lastNotifiedId String?
+  createdAt      DateTime @default(now())
+
+  @@index([platform, targetHandle])
+  @@map("stream_subscriptions")
+}
+
+model Birthday {
+  id        String   @id @default(cuid())
+  guildId   String
+  userId    String
+  day       Int
+  month     Int
+  year      Int?
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId])
+  @@index([guildId, month, day])
+  @@map("birthdays")
+}
+
+model BirthdayConfig {
+  id        String   @id @default(cuid())
+  guildId   String   @unique
+  channelId String?
+  roleId    String?
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("birthday_configs")
+}
+
+model CountingGame {
+  id            String   @id @default(cuid())
+  guildId       String   @unique
+  channelId     String   @unique
+  currentCount  Int      @default(0)
+  lastUserId    String?
+  highestRecord Int      @default(0)
+  enabled       Boolean  @default(true)
+  updatedAt     DateTime @updatedAt
+
+  @@map("counting_games")
+}
+
+model Confession {
+  id        String   @id @default(cuid())
+  guildId   String
+  number    Int
+  authorId  String
+  content   String
+  messageId String?
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, number])
+  @@index([guildId, messageId])
+  @@map("confessions")
+}
+
+model ConfessionConfig {
+  id        String   @id @default(cuid())
+  guildId   String   @unique
+  channelId String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("confession_configs")
+}
+
+model ApplicationForm {
+  id              String   @id @default(cuid())
+  guildId         String
+  position        String   // Ex: "Modérateur", "Partenariat"
+  questions       Json     // Array of { id, label, style, required }
+  reviewChannelId String
+  createdAt       DateTime @default(now())
+
+  @@unique([guildId, position])
+  @@map("application_forms")
+}
+
+model Application {
+  id          String   @id @default(cuid())
+  guildId     String
+  position    String
+  applicantId String
+  answers     Json     // Record<questionLabel, answerText>
+  status      String   @default("pending") // "pending" | "accepted" | "rejected" | "interview"
+  reviewedBy  String?
+  messageId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([guildId, applicantId])
+  @@index([guildId, status])
+  @@map("applications")
+}
+
+model EmbedTemplate {
+  id        String   @id @default(cuid())
+  guildId   String
+  name      String
+  embedData Json     // Title, description, color, fields, etc.
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guildId, name])
+  @@map("embed_templates")
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  guildId    String
+  reportedId String
+  reporterId String
+  reason     String
+  proofUrl   String?
+  status     String   @default("pending") // "pending" | "warned" | "muted" | "ignored"
+  messageId  String?
+  createdAt  DateTime @default(now())
+
+  @@index([guildId, reportedId])
+  @@map("reports")
+}
+
+model ReportConfig {
+  id        String   @id @default(cuid())
+  guildId   String   @unique
+  channelId String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("report_configs")
+}
+
+
+

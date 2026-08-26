@@ -101,5 +101,14 @@ export const config = {
     queueLimit: process.env.MUSIC_QUEUE_LIMIT ? parseInt(process.env.MUSIC_QUEUE_LIMIT, 10) : 200,
     idleTimeoutSec: process.env.MUSIC_IDLE_TIMEOUT ? parseInt(process.env.MUSIC_IDLE_TIMEOUT, 10) : 300,
   },
+  stream: {
+    twitchClientId: process.env.TWITCH_CLIENT_ID || '',
+    twitchClientSecret: process.env.TWITCH_CLIENT_SECRET || '',
+    youtubeApiKey: process.env.YOUTUBE_API_KEY || '',
+    maxSubsPerGuild: process.env.MAX_STREAM_SUBS_PER_GUILD
+      ? parseInt(process.env.MAX_STREAM_SUBS_PER_GUILD, 10)
+      : 10,
+  },
 };
+
 
