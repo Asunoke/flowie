@@ -965,6 +965,8 @@ export async function handleInteractionCreate(
 
       if (errCode === 'UND_ERR_CONNECT_TIMEOUT' || errName === 'ConnectTimeoutError') {
         logger.warn(`[NETWORK TIMEOUT] Connection to Discord API timed out while executing /${command.data.name}`);
+      } else if (errCode === 10062 || errCode === '10062') {
+        logger.warn(`[INTERACTION TIMEOUT] Interaction expired before completion for /${command.data.name}`);
       } else {
         logger.error({ err: error, command: command.data.name }, `[COMMAND ERROR] Error executing /${command.data.name}`);
       }

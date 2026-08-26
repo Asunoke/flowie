@@ -85,7 +85,7 @@ export const config = {
   scaling: {
     shardCount: process.env.SHARD_COUNT ? parseInt(process.env.SHARD_COUNT, 10) : 'auto',
     dbConnectionLimit: process.env.DATABASE_CONNECTION_LIMIT || '20',
-    healthPort: process.env.HEALTH_PORT ? parseInt(process.env.HEALTH_PORT, 10) : 3000,
+    healthPort: process.env.HEALTH_PORT ? parseInt(process.env.HEALTH_PORT, 10) : 4000,
     configCacheTtl: process.env.CONFIG_CACHE_TTL ? parseInt(process.env.CONFIG_CACHE_TTL, 10) : 600,
     lockedMode: (process.env.LOCKED_MODE as 'leave' | 'stay_disabled') || 'leave',
     officialDiscordInvite: process.env.OFFICIAL_DISCORD_INVITE || 'https://discord.gg/florynxlabs',
