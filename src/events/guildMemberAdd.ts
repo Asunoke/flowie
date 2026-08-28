@@ -3,6 +3,7 @@ import { prisma } from '../database/db.js';
 import { WelcomeCardService } from '../services/welcomeCardService.js';
 import { EmbedService } from '../services/embedService.js';
 import { InviteService } from '../services/inviteService.js';
+import { TimeCapsuleService } from '../services/timeCapsuleService.js';
 import { logger } from '../utils/logger.js';
 import { redis } from '../services/redisService.js';
 
@@ -10,6 +11,9 @@ export async function handleGuildMemberAdd(member: GuildMember) {
   try {
     // 0. Track Invite Used on Member Join
     await InviteService.trackMemberJoin(member.guild, member);
+
+    // 0b. Reactive check for pending member count time capsules
+    await TimeCapsuleService.checkMemberCountCapsules(member.guild);
 
     const guildConfig = await prisma.guild.findUnique({
       where: { id: member.guild.id },

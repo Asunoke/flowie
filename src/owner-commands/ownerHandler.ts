@@ -5,6 +5,7 @@ import { EmbedService } from '../services/embedService.js';
 import { BlacklistService } from '../services/blacklistService.js';
 import { PlanService } from '../services/planService.js';
 import { loadCommands } from '../utils/commandLoader.js';
+import { TimeCapsuleService } from '../services/timeCapsuleService.js';
 
 export async function handleOwnerCommand(message: Message): Promise<boolean> {
   const ownerId = process.env.OWNER_ID || config.owner.id;
@@ -371,6 +372,42 @@ export async function handleOwnerCommand(message: Message): Promise<boolean> {
         await message.reply({ embeds: [embed] });
         success = true;
         resultSummary = `Stats affichées | Guilds: ${guildsCount} | Uptime: ${hours}h${mins}m`;
+        break;
+      }
+
+      // ─── 10. TIME CAPSULE FORCE-OPEN ─────────────────────────────────────
+      case 'timecapsule':
+      case 'force-open': {
+        let targetId = args[0];
+        if (commandName === 'timecapsule' && args[0] === 'force-open') {
+          targetId = args[1];
+        }
+
+        if (!targetId) {
+          await message.reply('❌ Usage: `!!timecapsule force-open <capsuleId>` ou `!!force-open <capsuleId>`');
+          return true;
+        }
+
+        try {
+          const opened = await TimeCapsuleService.forceOpenCapsule(targetId, message.author.id);
+
+          const embed = EmbedService.gold(
+            '⚠️ Ouverture d Urgence (Bot Owner)',
+            `La capsule temporelle \`#${opened.id}\` a été forcé-ouverte.`
+          ).addFields(
+            { name: '🏰 Server ID', value: `\`${opened.guildId}\``, inline: true },
+            { name: '👤 Author ID', value: `<@${opened.authorId}> (\`${opened.authorTag}\`)`, inline: true },
+            { name: '📜 Contenu Scellé', value: opened.content, inline: false },
+            { name: '📅 Date de création', value: `<t:${Math.floor(opened.createdAt.getTime() / 1000)}:f>`, inline: true }
+          ).setFooter({ text: `Urgence Moderation • ID: ${opened.id}` });
+
+          await message.reply({ embeds: [embed] });
+          success = true;
+          resultSummary = `[OWNER_FORCE_OPEN] Capsule ${opened.id} (Guild: ${opened.guildId})`;
+        } catch (err: any) {
+          await message.reply(`❌ **Erreur d ouverture d urgence :** ${err?.message || err}`);
+          success = false;
+        }
         break;
       }
 

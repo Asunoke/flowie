@@ -1,7 +1,16 @@
-import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ChatInputCommandInteraction } from 'discord.js';
+import {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  ChannelType,
+  ChatInputCommandInteraction,
+  GuildMember,
+  TextChannel,
+  AttachmentBuilder,
+} from 'discord.js';
 import { Command } from '../../types/command.js';
 import { prisma } from '../../database/db.js';
 import { EmbedService } from '../../services/embedService.js';
+import { WelcomeCardService } from '../../services/welcomeCardService.js';
 import { config } from '../../config/index.js';
 
 export const command: Command = {
@@ -11,6 +20,31 @@ export const command: Command = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((sub) =>
       sub.setName('voir').setDescription('Afficher la configuration globale Welcome & Leave')
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('test')
+        .setDescription('Tester et simuler un message d\'arrivée (welcome) ou de départ (leave)')
+        .addStringOption((opt) =>
+          opt
+            .setName('type')
+            .setDescription('Type de message à simuler')
+            .setRequired(false)
+            .addChoices(
+              { name: 'Bienvenue (Welcome)', value: 'welcome' },
+              { name: 'Départ (Leave)', value: 'leave' }
+            )
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('test-welcome')
+        .setDescription('Simuler et envoyer le message de bienvenue pour l\'administrateur')
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('test-leave')
+        .setDescription('Simuler et envoyer le message de départ pour l\'administrateur')
     )
     .addSubcommand((sub) =>
       sub
@@ -117,6 +151,137 @@ export const command: Command = {
 
     const subcommand = interaction.options.getSubcommand(false) || 'voir';
 
+    if (subcommand === 'test' || subcommand === 'test-welcome' || subcommand === 'test-leave') {
+      await interaction.deferReply({ ephemeral: true });
+
+      const testType =
+        subcommand === 'test-leave'
+          ? 'leave'
+          : subcommand === 'test-welcome'
+          ? 'welcome'
+          : interaction.options.getString('type') || 'welcome';
+
+      const member = (interaction.member as GuildMember) || null;
+      if (!member) {
+        await interaction.editReply({
+          embeds: [EmbedService.error('Erreur', 'Impossible de récupérer votre profil de membre.')],
+        });
+        return;
+      }
+
+      if (testType === 'welcome') {
+        let targetChannel = guildConfig.welcomeChannelId
+          ? interaction.guild.channels.cache.get(guildConfig.welcomeChannelId)
+          : null;
+
+        if (!targetChannel || !targetChannel.isTextBased()) {
+          targetChannel = interaction.channel;
+        }
+
+        if (!targetChannel || !targetChannel.isTextBased()) {
+          await interaction.editReply({
+            embeds: [
+              EmbedService.error(
+                'Erreur Salon',
+                'Aucun salon textuel valide trouvé pour envoyer le message de test.'
+              ),
+            ],
+          });
+          return;
+        }
+
+        const rawMsg =
+          guildConfig.welcomeMessage ||
+          'Bienvenue {user} sur {server} ! Nous sommes désormais {membercount} membres.';
+        const formattedMsg = rawMsg
+          .replace(/{user}/g, `${member}`)
+          .replace(/{server}/g, interaction.guild.name)
+          .replace(/{membercount}/g, interaction.guild.memberCount.toString());
+
+        const cardBuffer = await WelcomeCardService.generateWelcomeCard(
+          member,
+          guildConfig.welcomeBgUrl
+        );
+        const attachment = new AttachmentBuilder(cardBuffer, { name: 'welcome-card.png' });
+
+        const embed = EmbedService.create('🎉 [TEST] Nouveau Membre !', formattedMsg).setImage(
+          'attachment://welcome-card.png'
+        );
+
+        await (targetChannel as TextChannel).send({
+          content: `${member}`,
+          embeds: [embed],
+          files: [attachment],
+        });
+
+        await interaction.editReply({
+          embeds: [
+            EmbedService.success(
+              'Test de Bienvenue envoyé 🧪',
+              `Le message et la carte de bienvenue de test ont été envoyés dans ${targetChannel}.`
+            ),
+          ],
+        });
+        return;
+      } else {
+        let targetChannel = guildConfig.leaveChannelId
+          ? interaction.guild.channels.cache.get(guildConfig.leaveChannelId)
+          : null;
+
+        if (!targetChannel || !targetChannel.isTextBased()) {
+          targetChannel = interaction.channel;
+        }
+
+        if (!targetChannel || !targetChannel.isTextBased()) {
+          await interaction.editReply({
+            embeds: [
+              EmbedService.error(
+                'Erreur Salon',
+                'Aucun salon textuel valide trouvé pour envoyer le message de test.'
+              ),
+            ],
+          });
+          return;
+        }
+
+        const rawMsg =
+          guildConfig.leaveMessage ||
+          '{user} a quitté {server}. Nous sommes désormais {membercount} membres.';
+        const tagOrName = member.user ? member.user.tag : interaction.user.tag;
+        const formattedMsg = rawMsg
+          .replace(/{user}/g, `**${tagOrName}**`)
+          .replace(/{server}/g, interaction.guild.name)
+          .replace(/{membercount}/g, interaction.guild.memberCount.toString());
+
+        const cardBuffer = await WelcomeCardService.generateLeaveCard(
+          member,
+          guildConfig.leaveBgUrl
+        );
+        const attachment = new AttachmentBuilder(cardBuffer, { name: 'leave-card.png' });
+
+        const embed = EmbedService.create(
+          '👋 [TEST] Départ d\'un membre',
+          formattedMsg,
+          config.bot.colors.error
+        ).setImage('attachment://leave-card.png');
+
+        await (targetChannel as TextChannel).send({
+          embeds: [embed],
+          files: [attachment],
+        });
+
+        await interaction.editReply({
+          embeds: [
+            EmbedService.success(
+              'Test de Départ envoyé 🧪',
+              `Le message et la carte de départ de test ont été envoyés dans ${targetChannel}.`
+            ),
+          ],
+        });
+        return;
+      }
+    }
+
     if (subcommand === 'voir') {
       const embed = EmbedService.gold(
         `🎉 Configuration Welcome & Leave — ${interaction.guild.name}`,
@@ -167,7 +332,7 @@ export const command: Command = {
           value: guildConfig.autoRoleId ? `<@&${guildConfig.autoRoleId}>` : '`Non configuré`',
           inline: true,
         }
-      ).setFooter({ text: 'Variables disponibles dans les messages : {user}, {server}, {membercount}' });
+      ).setFooter({ text: 'Variables : {user}, {server}, {membercount} • Testez avec /welcome test' });
 
       await interaction.reply({ embeds: [embed] });
       return;
@@ -294,3 +459,4 @@ export const command: Command = {
 };
 
 export default command;
+

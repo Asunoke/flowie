@@ -9,6 +9,7 @@ import { InviteService } from '../services/inviteService.js';
 
 import { StreamNotifyService } from '../services/streamNotifyService.js';
 import { BirthdayService } from '../services/birthdayService.js';
+import { TimeCapsuleService } from '../services/timeCapsuleService.js';
 
 export async function handleReady(client: Client) {
 
@@ -54,6 +55,9 @@ export async function handleReady(client: Client) {
 
   // Start Daily Birthday scheduler
   BirthdayService.startScheduler(client);
+
+  // Start Time Capsule scheduler (date & member count checks)
+  TimeCapsuleService.startScheduler(client);
 
 
   // Initialize Invite Tracking Redis cache on boot & start 10-minute refresh

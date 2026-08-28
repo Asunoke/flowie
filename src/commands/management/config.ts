@@ -114,6 +114,18 @@ export const command: Command = {
             .setMaxValue(150)
             .setRequired(true)
         )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('timecapsule')
+        .setDescription('Définir le salon d annonce automatique des capsules temporelles')
+        .addChannelOption((opt) =>
+          opt
+            .setName('salon')
+            .setDescription('Salon d annonce')
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true)
+        )
     ),
   category: 'management',
   userPermissions: [PermissionFlagsBits.Administrator],
@@ -132,6 +144,7 @@ export const command: Command = {
       ).addFields(
         { name: '📋 Salon ModLog', value: guildConfig.logChannelId ? `<#${guildConfig.logChannelId}>` : '`Non configuré`', inline: true },
         { name: '👋 Salon Bienvenue', value: guildConfig.welcomeChannelId ? `<#${guildConfig.welcomeChannelId}>` : '`Non configuré`', inline: true },
+        { name: '⏳ Salon Capsules', value: guildConfig.timeCapsuleChannelId ? `<#${guildConfig.timeCapsuleChannelId}>` : '`Non configuré`', inline: true },
         { name: '🎭 Auto-Rôle', value: guildConfig.autoRoleId ? `<@&${guildConfig.autoRoleId}>` : '`Non configuré`', inline: true },
         { name: '🪙 Nom Devise', value: `\`${guildConfig.currencyName}\``, inline: true },
         { name: '🌐 Langue', value: `\`${guildConfig.language.toUpperCase()}\``, inline: true },
@@ -299,7 +312,19 @@ export const command: Command = {
       });
       return;
     }
+
+    if (subcommand === 'timecapsule') {
+      const channel = interaction.options.getChannel('salon', true);
+      await GuildConfigService.updateGuildConfig(interaction.guild.id, {
+        timeCapsuleChannelId: channel.id,
+      });
+      await interaction.reply({
+        embeds: [EmbedService.success('Configuration mise à jour', `Le salon d annonce des capsules temporelles a été défini sur ${channel}.`)],
+      });
+      return;
+    }
   },
 };
 
 export default command;
+

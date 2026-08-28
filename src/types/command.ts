@@ -36,6 +36,8 @@ export interface Command {
     | 'tempvoice'
     | 'invites'
     | 'notify'
+    | 'timecapsule'
+    | 'report'
     | 'community';
 
 
@@ -68,6 +70,8 @@ export interface ContextMenuCommand {
     | 'tempvoice'
     | 'invites'
     | 'notify'
+    | 'timecapsule'
+    | 'report'
     | 'community';
 
   userPermissions?: PermissionResolvable[];

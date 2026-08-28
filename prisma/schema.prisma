@@ -30,6 +30,7 @@ model Guild {
   ticketLogsChannelId String?
   ticketStaffRoleId  String?
   ticketLimit        Int      @default(1)
+  timeCapsuleChannelId String?
   ownerUserId        String?
   isLocked           Boolean  @default(false)
   levelingEnabled    Boolean  @default(true)
@@ -44,6 +45,7 @@ model Guild {
   shopItems          ShopItem[]
   tickets            Ticket[]
   moderationCases    ModerationCase[]
+  timeCapsules       TimeCapsule[]
 
   @@index([ownerUserId, isLocked])
   @@map("guilds")
@@ -544,5 +546,22 @@ model ReportConfig {
   @@map("report_configs")
 }
 
+model TimeCapsule {
+  id                 String    @id @default(cuid())
+  guildId            String
+  authorId           String
+  authorTag          String    // pseudo au moment de la création, pour affichage si le membre part
+  content            String
+  isPublic           Boolean   @default(true)
+  triggerType        String    // "date" | "member_count"
+  triggerDate        DateTime?
+  triggerMemberCount Int?
+  opened             Boolean   @default(false)
+  openedAt           DateTime?
+  createdAt          DateTime  @default(now())
 
+  guild              Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
+  @@index([guildId, opened])
+  @@map("time_capsules")
+}
