@@ -1,4 +1,5 @@
 import { Message, PermissionFlagsBits, TextChannel } from 'discord.js';
+import { config } from '../config/index.js';
 import { prisma } from '../database/db.js';
 import { redis } from '../services/redisService.js';
 import { EmbedService } from '../services/embedService.js';
@@ -75,10 +76,10 @@ export async function handleMessageCreate(message: Message) {
             const embed = EmbedService.create(
               '🔤 Chaîne de Mots — Partie Terminée !',
               `⏰ **Temps écoulé !** Aucun mot valide n'a été proposé dans le délai de \`${active.timeoutSec}s\`.\n\n` +
-                `📊 **Longueur de la chaîne** : **${active.scoreCount} mot(s)**\n` +
-                `🔤 **Dernier mot valide** : \`${active.lastWord}\`\n\n` +
-                `🏆 **Classement des joueurs** :\n${leaderboardLines.length > 0 ? leaderboardLines.join('\n') : '`Aucun point marqué`'}`,
-              0x0B3D2E
+              `📊 **Longueur de la chaîne** : **${active.scoreCount} mot(s)**\n` +
+              `🔤 **Dernier mot valide** : \`${active.lastWord}\`\n\n` +
+              `🏆 **Classement des joueurs** :\n${leaderboardLines.length > 0 ? leaderboardLines.join('\n') : '`Aucun point marqué`'}`,
+              config.bot.colors.primary
             );
 
             const targetChan = message.channel as TextChannel;
@@ -99,12 +100,12 @@ export async function handleMessageCreate(message: Message) {
   const botUser = message.client.user;
   if (botUser && (message.content.trim() === `<@${botUser.id}>` || message.content.trim() === `<@!${botUser.id}>`)) {
     const embed = EmbedService.create(
-      '🌲 Centre d Assistance Flowie by Florynx Labs',
+      '👑 Centre d Assistance William by Florynx Labs',
       'Voici les **35 commandes** réparties en 6 modules. Utilisez `/help` pour voir toutes les options.'
     )
       .addFields(
         {
-          name: '⚙️ Core (4)',
+          name: '⚙️ principal (4)',
           value: '`/ping` • `/help` • `/info` • `/botstats`',
           inline: false,
         },
@@ -134,7 +135,7 @@ export async function handleMessageCreate(message: Message) {
           inline: false,
         }
       )
-      .setFooter({ text: 'Flowie • Florynx Labs | 35 commandes enregistrées' });
+      .setFooter({ text: 'William • Florynx Labs | 35 commandes enregistrées' });
 
     await message.reply({ embeds: [embed] });
     return;

@@ -33,7 +33,7 @@ export const command: Command = {
     // Step 1: Overview & Welcome
     const embedStep1 = EmbedService.gold(
       `⚙️ Assistant de Configuration — ${interaction.guild.name}`,
-      'Bienvenue dans l\'assistant interactif Flowie !\n' +
+      'Bienvenue dans l\'assistant interactif William !\n' +
         'Suivez les étapes ci-dessous pour configurer les fonctionnalités principales de votre serveur.\n\n' +
         '**Étape 1/3** : Choisissez la langue et la monnaie du serveur.'
     ).addFields(
@@ -81,7 +81,7 @@ export const command: Command = {
         // Step 2: Modlog selection
         const embedStep2 = EmbedService.gold(
           '⚙️ Étape 2/3 — Salon de Modération & Logs',
-          'Sélectionnez le salon textuel où Flowie enverra les logs de modération, d\'alertes et de tickets.'
+          'Sélectionnez le salon textuel où William enverra les logs de modération, d\'alertes et de tickets.'
         );
 
         const channelSelect = new ChannelSelectMenuBuilder()

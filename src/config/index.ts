@@ -25,7 +25,7 @@ import path from 'path';
 
 let jsonConfig = {
   embed: {
-    footerText: 'Flowie • Florynx Labs',
+    footerText: 'William • Florynx Labs',
     footerIconUrl: 'https://cdn.discordapp.com/embed/avatars/0.png',
   },
   economy: {
@@ -57,19 +57,21 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   logLevel: process.env.LOG_LEVEL || 'info',
   bot: {
-    name: 'Flowie',
-    signature: 'Flowie by Florynx Labs',
+    name: 'William',
+    signature: 'William by Florynx Labs',
     slogan: 'Born from love. Bound by physics.',
     colors: {
-      primary: 0x0B3D2E, // Forest Green #0B3D2E
-      gold: 0xD4AF37,    // Gold #D4AF37
-      success: 0x2ECC71, // Emerald Green
-      warning: 0xF39C12, // Orange
-      error: 0xE74C3C,   // Red
-      info: 0x3498DB,    // Blue
+      primary: 0x1E3A8A,       // Deep Blue #1E3A8A (replaces Forest Green)
+      accentLight: 0x3B82F6,   // Vivid Blue #3B82F6
+      secondary: 0x60A5FA,     // Light Blue #60A5FA
+      gold: 0x60A5FA,          // Light Blue #60A5FA (replaces Gold accent)
+      success: 0x2ECC71,       // Emerald Green
+      warning: 0xF39C12,       // Orange
+      error: 0xE74C3C,         // Red
+      info: 0x3B82F6,          // Vivid Blue
     },
     footer: {
-      text: jsonConfig.embed?.footerText || 'Flowie • Florynx Labs',
+      text: jsonConfig.embed?.footerText || 'William • Florynx Labs',
       iconUrl: jsonConfig.embed?.footerIconUrl || 'https://cdn.discordapp.com/embed/avatars/0.png',
     },
   },

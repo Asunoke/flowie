@@ -14,11 +14,11 @@ import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 
 /**
- * Handles guildCreate event when Flowie joins a new server
+ * Handles guildCreate event when William joins a new server
  */
 export async function handleGuildCreate(guild: Guild) {
   try {
-    logger.info(`[GUILD_JOIN] Flowie joined server "${guild.name}" (${guild.id}) — Member Count: ${guild.memberCount}`);
+    logger.info(`[GUILD_JOIN] William joined server "${guild.name}" (${guild.id}) — Member Count: ${guild.memberCount}`);
 
     // Cache invites for Invite Tracking
     await InviteService.cacheGuildInvites(guild);
@@ -52,9 +52,9 @@ export async function handleGuildCreate(guild: Guild) {
 
       if (targetChannel && 'send' in targetChannel) {
         const embed = EmbedService.gold(
-          '🌲 Bienvenue sur Flowie by Florynx Labs !',
-          `Merci d'avoir ajouté Flowie à **${guild.name}**.\n\n` +
-            `Flowie est prêt à l'emploi avec les paramètres par défaut.\n` +
+          '👑 Bienvenue sur William by Florynx Labs !',
+          `Merci d'avoir ajouté William à **${guild.name}**.\n\n` +
+            `William est prêt à l'emploi avec les paramètres par défaut.\n` +
             `Pour configurer le serveur en quelques clics, utilisez la commande **/setup** ou **/help**.`
         ).addFields(
           { name: '⚡ Assistant de configuration', value: 'Lancez `/setup` pour un assistant interactif pas-à-pas.', inline: false },
@@ -73,8 +73,8 @@ export async function handleGuildCreate(guild: Guild) {
 
       const lockEmbed = EmbedService.gold(
         '🔒 Limite de plan atteinte — Serveur non activé',
-        'Flowie fonctionne actuellement en plan gratuit limité à **1 serveur par propriétaire**.\n' +
-          'Vous avez déjà Flowie actif sur un autre serveur.'
+        'William fonctionne actuellement en plan gratuit limité à **1 serveur par propriétaire**.\n' +
+          'Vous avez déjà William actif sur un autre serveur.'
       )
         .addFields(
           {

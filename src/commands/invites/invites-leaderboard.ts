@@ -51,7 +51,7 @@ const invitesLeaderboardCommand: Command = {
     const embed = EmbedService.create(
       `🏆 Classement des Inviteurs — ${interaction.guild.name}`,
       descriptionLines.join('\n')
-    ).setFooter({ text: `Page ${page}/${totalPages} • Flowie Invite Tracking` });
+    ).setFooter({ text: `Page ${page}/${totalPages} • William Invite Tracking` });
 
     await interaction.reply({ embeds: [embed] });
   },

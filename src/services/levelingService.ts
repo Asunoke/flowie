@@ -131,10 +131,10 @@ export class LevelingService {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Background Gradient (Dark Forest #0B3D2E to Charcoal #1A1A1A)
+    // Background Gradient (Deep Blue #1E3A8A to Charcoal #0F172A)
     const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, '#0B3D2E');
-    bgGradient.addColorStop(1, '#111827');
+    bgGradient.addColorStop(0, '#1E3A8A');
+    bgGradient.addColorStop(1, '#0F172A');
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
 
@@ -143,8 +143,8 @@ export class LevelingService {
     ctx.roundRect(20, 20, width - 40, height - 40, 20);
     ctx.fill();
 
-    // Border Gold Accent
-    ctx.strokeStyle = '#D4AF37';
+    // Border Blue Accent
+    ctx.strokeStyle = '#3B82F6';
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -162,7 +162,7 @@ export class LevelingService {
       // Avatar Ring
       ctx.beginPath();
       ctx.arc(100, 125, 60, 0, Math.PI * 2);
-      ctx.strokeStyle = '#D4AF37';
+      ctx.strokeStyle = '#3B82F6';
       ctx.lineWidth = 4;
       ctx.stroke();
     } catch {
@@ -176,10 +176,10 @@ export class LevelingService {
 
     // Rank & Level Labels
     ctx.font = 'bold 22px sans-serif';
-    ctx.fillStyle = '#D4AF37';
+    ctx.fillStyle = '#60A5FA';
     ctx.fillText(`RANG #${rank}`, 540, 90);
 
-    ctx.fillStyle = '#2ECC71';
+    ctx.fillStyle = '#3B82F6';
     ctx.fillText(`NIV. ${level}`, 680, 90);
 
     // XP Progress Bar Math
@@ -194,12 +194,12 @@ export class LevelingService {
     ctx.roundRect(180, 140, 560, 28, 14);
     ctx.fill();
 
-    // Progress Bar Fill (Gold / Green Gradient)
+    // Progress Bar Fill (Vivid Blue / Light Blue Gradient)
     if (progressRatio > 0) {
       const fillWidth = Math.max(28, 560 * progressRatio);
       const fillGrad = ctx.createLinearGradient(180, 0, 180 + fillWidth, 0);
-      fillGrad.addColorStop(0, '#2ECC71');
-      fillGrad.addColorStop(1, '#D4AF37');
+      fillGrad.addColorStop(0, '#60A5FA');
+      fillGrad.addColorStop(1, '#3B82F6');
       ctx.fillStyle = fillGrad;
       ctx.roundRect(180, 140, fillWidth, 28, 14);
       ctx.fill();

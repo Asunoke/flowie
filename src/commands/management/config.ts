@@ -8,7 +8,7 @@ import { getMusicSettings } from '../../services/musicService.js';
 export const command: Command = {
   data: new SlashCommandBuilder()
     .setName('config')
-    .setDescription('Configuration générale du serveur pour Flowie')
+    .setDescription('Configuration générale du serveur pour William')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((sub) =>
       sub.setName('voir').setDescription('Afficheur la configuration actuelle du serveur')

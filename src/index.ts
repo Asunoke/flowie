@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function startShardingManager() {
-  logger.info('🚀 [SHARD MANAGER] Initializing Flowie Sharding Manager (Florynx Labs)...');
+  logger.info('🚀 [SHARD MANAGER] Initializing William Sharding Manager (Florynx Labs)...');
 
   const token = config.token;
   if (!token || token === 'mock_discord_token_for_dev') {

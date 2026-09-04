@@ -6,13 +6,13 @@ import { config } from '../../config/index.js';
 export const command: Command = {
   data: new SlashCommandBuilder()
     .setName('info')
-    .setDescription('Informations sur le bot Flowie et Florynx Labs'),
+    .setDescription('Informations sur le bot William et Florynx Labs'),
   category: 'core',
   cooldown: 5,
   async execute(interaction) {
     const embed = EmbedService.create(
-      `🌲 ${config.bot.name} — ${config.bot.signature}`,
-      `*${config.bot.slogan}*\n\n**Flowie** est un bot Discord multifonction modulaire et haute performance, conçu par **Florynx Labs**.`
+      `👑 ${config.bot.name} — ${config.bot.signature}`,
+      `*${config.bot.slogan}*\n\n**William** est un bot Discord multifonction modulaire et haute performance, conçu par **Florynx Labs**.`
     )
       .addFields(
         { name: '🛠️ Stack Technique', value: 'Node.js • TypeScript • Discord.js v14 • PostgreSQL (Prisma) • Redis • Docker', inline: false },

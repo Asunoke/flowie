@@ -173,7 +173,7 @@ export async function handleOwnerCommand(message: Message): Promise<boolean> {
 
         const name = targetGuild.name;
         await targetGuild.leave();
-        await message.reply(`🚪 **Flowie a quitté le serveur "${name}" (\`${targetGuildId}\`).**`);
+        await message.reply(`🚪 **William a quitté le serveur "${name}" (\`${targetGuildId}\`).**`);
         success = true;
         resultSummary = `Quitté serveur ${name} (${targetGuildId})`;
         break;
@@ -318,7 +318,7 @@ export async function handleOwnerCommand(message: Message): Promise<boolean> {
             for (const g of guilds) {
               const channel = g.systemChannel || g.channels.cache.find((c) => c.isTextBased() && 'send' in c);
               if (channel && 'send' in channel) {
-                const embed = EmbedService.gold('📢 Annonce Officielle Flowie', broadcastText);
+                const embed = EmbedService.gold('📢 Annonce Officielle William', broadcastText);
                 await (channel as TextChannel).send({ embeds: [embed] }).catch(() => null);
                 sentCount++;
               }
@@ -359,7 +359,7 @@ export async function handleOwnerCommand(message: Message): Promise<boolean> {
         const mins = Math.floor((uptimeSec % 3600) / 60);
 
         const embed = EmbedService.gold(
-          '🌍 Statistiques Globales Flowie',
+          '🌍 Statistiques Globales William',
           `Informations générales sur l'instance du bot.`
         ).addFields(
           { name: '🏰 Serveurs totaux', value: `\`${guildsCount}\``, inline: true },
@@ -425,7 +425,7 @@ export async function handleOwnerCommand(message: Message): Promise<boolean> {
           const logEmbed = EmbedService.create(
             '👑 Exécution de commande Owner',
             `**Commande** : \`!!${commandName}\`\n**Args** : \`${args.join(' ') || 'Aucun'}\`\n**Résultat** : ${resultSummary || 'Terminé'}`,
-            0x0B3D2E
+            config.bot.colors.primary
           ).setFooter({ text: `Owner ID: ${message.author.id} • ${new Date().toLocaleString('fr-FR')}` });
 
           await logChannel.send({ embeds: [logEmbed] }).catch(() => null);

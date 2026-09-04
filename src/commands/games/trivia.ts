@@ -29,7 +29,7 @@ export const command: Command = {
         {
           id: '1',
           category: 'Informatique',
-          question: 'Quel langage de programmation est utilisé par le bot Flowie ?',
+          question: 'Quel langage de programmation est utilisé par le bot William ?',
           options: ['Python', 'TypeScript', 'Java', 'PHP'],
           answer: 'TypeScript',
           reward: 75,

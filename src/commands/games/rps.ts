@@ -65,7 +65,7 @@ export const command: Command = {
 
       const embed = EmbedService.success(
         '✂️ Pierre-Feuille-Ciseaux — VICTOIRE !',
-        `Vous : **${emojis[userChoice]}**\nFlowie : **${emojis[botChoice]}**\n\n🎉 Vous remportez **+${winnings} ${currency}** !`
+        `Vous : **${emojis[userChoice]}**\nWilliam : **${emojis[botChoice]}**\n\n🎉 Vous remportez **+${winnings} ${currency}** !`
       );
       await interaction.reply({ embeds: [embed] });
     } else if (result === 'DRAW') {
@@ -80,13 +80,13 @@ export const command: Command = {
 
       const embed = EmbedService.gold(
         '✂️ Pierre-Feuille-Ciseaux — ÉGALITÉ',
-        `Vous : **${emojis[userChoice]}**\nFlowie : **${emojis[botChoice]}**\n\n🤝 Votre mise de **${bet} ${currency}** vous a été remboursée.`
+        `Vous : **${emojis[userChoice]}**\nWilliam : **${emojis[botChoice]}**\n\n🤝 Votre mise de **${bet} ${currency}** vous a été remboursée.`
       );
       await interaction.reply({ embeds: [embed] });
     } else {
       const embed = EmbedService.error(
         '✂️ Pierre-Feuille-Ciseaux — DÉFAITE',
-        `Vous : **${emojis[userChoice]}**\nFlowie : **${emojis[botChoice]}**\n\nVous perdez votre mise de **${bet} ${currency}**.`
+        `Vous : **${emojis[userChoice]}**\nWilliam : **${emojis[botChoice]}**\n\nVous perdez votre mise de **${bet} ${currency}**.`
       );
       await interaction.reply({ embeds: [embed] });
     }

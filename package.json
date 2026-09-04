@@ -1,7 +1,7 @@
 {
-  "name": "flowie-discord-bot",
+  "name": "william-discord-bot",
   "version": "1.0.0",
-  "description": "Flowie - Discord Bot by Florynx Labs",
+  "description": "William - Discord Bot by Florynx Labs",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

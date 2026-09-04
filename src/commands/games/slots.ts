@@ -7,7 +7,7 @@ import { EmbedService } from '../../services/embedService.js';
 export const command: Command = {
   data: new SlashCommandBuilder()
     .setName('slots')
-    .setDescription('Lancer la machine à sous Flowie')
+    .setDescription('Lancer la machine à sous William')
     .addIntegerOption((opt) => opt.setName('mise').setDescription('Montant à miser').setMinValue(1).setRequired(true)),
   category: 'games',
   cooldown: 3,

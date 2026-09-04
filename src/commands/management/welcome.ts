@@ -170,7 +170,7 @@ export const command: Command = {
       }
 
       if (testType === 'welcome') {
-        let targetChannel = guildConfig.welcomeChannelId
+        let targetChannel: any = guildConfig.welcomeChannelId
           ? interaction.guild.channels.cache.get(guildConfig.welcomeChannelId)
           : null;
 
@@ -224,7 +224,7 @@ export const command: Command = {
         });
         return;
       } else {
-        let targetChannel = guildConfig.leaveChannelId
+        let targetChannel: any = guildConfig.leaveChannelId
           ? interaction.guild.channels.cache.get(guildConfig.leaveChannelId)
           : null;
 

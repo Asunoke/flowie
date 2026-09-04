@@ -83,7 +83,7 @@ export const command: Command = {
           embeds: [
             EmbedService.error(
               'Permissions insuffisantes',
-              `Il manque au bot Flowie les permissions suivantes :\n- ${missingPermissions.join('\n- ')}`
+              `Il manque au bot William les permissions suivantes :\n- ${missingPermissions.join('\n- ')}`
             ),
           ],
         });
@@ -167,7 +167,7 @@ export const command: Command = {
               name: '➕ Créer un vocal',
               type: ChannelType.GuildVoice,
               parent: category && category instanceof CategoryChannel ? category.id : selectedCategoryId,
-              reason: 'Salon déclencheur automatique pour salons temporaires Flowie',
+              reason: 'Salon déclencheur automatique pour salons temporaires William',
             });
 
             selectedTriggerId = createdTrigger.id;

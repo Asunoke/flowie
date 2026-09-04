@@ -23,7 +23,7 @@ export const command: Command = {
     const guildCount = interaction.client.guilds.cache.size;
     const userCount = interaction.client.guilds.cache.reduce((acc, g) => acc + g.memberCount, 0);
 
-    const embed = EmbedService.gold('📊 Statistiques de Flowie', 'Métriques en temps réel du bot et du système')
+    const embed = EmbedService.gold('📊 Statistiques de William', 'Métriques en temps réel du bot et du système')
       .addFields(
         { name: '🌐 Serveurs', value: `\`${guildCount}\``, inline: true },
         { name: '👥 Utilisateurs gérés', value: `\`${userCount}\``, inline: true },

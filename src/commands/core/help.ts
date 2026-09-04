@@ -14,7 +14,7 @@ const HELP_IMAGE_URL = 'https://images.unsplash.com/photo-1618005182384-a83a8bd5
 export const command: Command = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('Affiche le centre d assistance interactif et la liste de toutes les commandes de Flowie'),
+    .setDescription('Affiche le centre d assistance interactif et la liste de toutes les commandes de William'),
   category: 'core',
   cooldown: 3,
 
@@ -30,7 +30,7 @@ export const command: Command = {
         commands: [
           { name: '/ping', desc: 'Affiche la latence du bot et de l\'API Discord' },
           { name: '/help', desc: 'Affiche le centre d\'assistance interactif avec sélecteur de module' },
-          { name: '/info', desc: 'Informations générales sur Flowie et Florynx Labs' },
+          { name: '/info', desc: 'Informations générales sur William et Florynx Labs' },
           { name: '/botstats', desc: 'Statistiques mémoire, uptime et état du système' },
         ],
       },
@@ -93,7 +93,7 @@ export const command: Command = {
           { name: '/duel <membre> <mise>', desc: 'Défi 1v1 avec mise bloquée en réserve (Coinflip ou Dés)' },
           { name: '/leaderboard-games', desc: 'Classement des meilleurs joueurs et plus grands gains' },
           { name: '/coinflip <mise>', desc: 'Jeu classique de Pile ou Face' },
-          { name: '/slots <mise>', desc: 'Machine à sous Flowie avec multiplicateurs' },
+          { name: '/slots <mise>', desc: 'Machine à sous William avec multiplicateurs' },
           { name: '/rps <mise>', desc: 'Pierre-Feuille-Ciseaux contre le bot' },
         ],
       },
@@ -271,8 +271,8 @@ export const command: Command = {
 
     // Main Overview Embed
     const mainEmbed = EmbedService.gold(
-      '🌲 Centre d Assistance Flowie by Florynx Labs',
-      'Bienvenue dans le menu d\'aide de **Flowie** !\n' +
+      '👑 Centre d Assistance William by Florynx Labs',
+      'Bienvenue dans le menu d\'aide de **William** !\n' +
         'Sélectionnez une catégorie dans le menu ci-dessous pour afficher les commandes disponibles et leurs détails.\n\n' +
         '⚡ **Commandes phares** : `/setup`, `/config`, `/play`, `/roulette`, `/ticket-panel`, `/uptimer`, `/rank`'
     )

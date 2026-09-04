@@ -13,7 +13,7 @@ import { EmbedService } from '../../services/embedService.js';
 export const command: Command = {
   data: new SlashCommandBuilder()
     .setName('blackjack')
-    .setDescription('Jouer une partie de Blackjack interactif contre le croupier Flowie')
+    .setDescription('Jouer une partie de Blackjack interactif contre le croupier William')
     .addIntegerOption((opt) => opt.setName('mise').setDescription('Montant à miser').setMinValue(1).setRequired(true)),
   category: 'games',
   cooldown: 5,

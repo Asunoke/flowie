@@ -36,8 +36,8 @@ export const command: Command = {
         EmbedService.success(
           `Mode 24/7 ${newState ? 'Activé' : 'Désactivé'}`,
           newState
-            ? '📡 Flowie restera connecté en vocal même quand la file est vide.'
-            : '🔌 Flowie se déconnectera automatiquement après inactivité.'
+            ? '📡 William restera connecté en vocal même quand la file est vide.'
+            : '🔌 William se déconnectera automatiquement après inactivité.'
         ),
       ],
     });

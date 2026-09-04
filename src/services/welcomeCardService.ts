@@ -13,7 +13,7 @@ export class WelcomeCardService {
     return this.createBannerCard(
       member,
       'BIENVENUE SUR LE SERVEUR !',
-      `Membre #${member.guild.memberCount} • Flowie by Florynx Labs`,
+      `Membre #${member.guild.memberCount} • William by Florynx Labs`,
       customBgUrl
     );
   }
@@ -28,7 +28,7 @@ export class WelcomeCardService {
     return this.createBannerCard(
       member,
       'A BIENTÔT !',
-      `Membres restants : ${member.guild.memberCount} • Flowie by Florynx Labs`,
+      `Membres restants : ${member.guild.memberCount} • William by Florynx Labs`,
       customBgUrl,
       '#E74C3C' // Red accent for leave card
     );
@@ -42,7 +42,7 @@ export class WelcomeCardService {
     titleText: string,
     subtitleText: string,
     customBgUrl?: string | null,
-    accentColor: string = '#D4AF37'
+    accentColor: string = '#3B82F6'
   ): Promise<Buffer> {
     const width = 800;
     const height = 350;
@@ -66,10 +66,10 @@ export class WelcomeCardService {
     }
 
     if (!bgLoaded) {
-      // Default Background Gradient (Forest Green #0B3D2E to Dark Emerald #051F17)
+      // Default Background Gradient (Deep Blue #1E3A8A to Dark Navy #071A33)
       const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#0B3D2E');
-      gradient.addColorStop(1, '#051F17');
+      gradient.addColorStop(0, '#1E3A8A');
+      gradient.addColorStop(1, '#071A33');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
     }
@@ -118,7 +118,7 @@ export class WelcomeCardService {
       ctx.stroke();
     } catch (err) {
       logger.warn({ err }, 'Could not load member avatar for banner card, using fallback circle');
-      ctx.fillStyle = '#0B3D2E';
+      ctx.fillStyle = '#1E3A8A';
       ctx.beginPath();
       ctx.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
       ctx.fill();

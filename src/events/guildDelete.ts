@@ -4,11 +4,11 @@ import { GuildConfigService } from '../services/guildConfigService.js';
 import { logger } from '../utils/logger.js';
 
 /**
- * Handles guildDelete event when Flowie leaves or is removed from a server
+ * Handles guildDelete event when William leaves or is removed from a server
  */
 export async function handleGuildDelete(guild: Guild) {
   try {
-    logger.info(`[GUILD_LEAVE] Flowie left server "${guild.name}" (${guild.id})`);
+    logger.info(`[GUILD_LEAVE] William left server "${guild.name}" (${guild.id})`);
 
     // Release slot in DB
     await PlanService.handleGuildLeave(guild.id);

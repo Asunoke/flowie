@@ -47,7 +47,7 @@ const embedCommand: Command = {
     .addSubcommand((sub) =>
       sub
         .setName('edit')
-        .setDescription('Modifier un embed déjà posté par Flowie')
+        .setDescription('Modifier un embed déjà posté par William')
         .addStringOption((opt) => opt.setName('message_id').setDescription('ID du message à modifier').setRequired(true))
         .addStringOption((opt) => opt.setName('titre').setDescription('Nouveau titre').setRequired(false))
         .addStringOption((opt) => opt.setName('description').setDescription('Nouvelle description').setRequired(false))

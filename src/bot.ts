@@ -52,7 +52,7 @@ let commandsCollection = new Collection<string, Command>();
 
 async function main() {
   const shardId = client.shard?.ids[0] ?? 0;
-  logger.info(`[SHARD #${shardId}] Starting Flowie Bot Worker...`);
+  logger.info(`[SHARD #${shardId}] Starting William Bot Worker...`);
 
   // Connect Database
   await connectDB();

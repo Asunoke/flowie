@@ -22,7 +22,7 @@ export const command: Command = {
     player.destroy();
 
     await interaction.reply({
-      embeds: [EmbedService.success('Lecture arrêtée', '⏹️ La musique a été arrêtée, la file d\'attente vidée et Flowie a quitté le salon vocal.')],
+      embeds: [EmbedService.success('Lecture arrêtée', '⏹️ La musique a été arrêtée, la file d\'attente vidée et William a quitté le salon vocal.')],
     });
   },
 };

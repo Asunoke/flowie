@@ -61,7 +61,7 @@ export const command: Command = {
       }
 
       const timeoutSec = interaction.options.getInteger('delai') || 20;
-      const initialWords = ['FLOWIE', 'FLORYNX', 'DISCORD', 'ROBOT', 'SYSTEME', 'GALAXIE', 'TICKET'];
+      const initialWords = ['WILLIAM', 'FLORYNX', 'DISCORD', 'ROBOT', 'SYSTEME', 'GALAXIE', 'TICKET'];
       const startWord = initialWords[Math.floor(Math.random() * initialWords.length)];
       const lastChar = startWord.slice(-1).toUpperCase();
 

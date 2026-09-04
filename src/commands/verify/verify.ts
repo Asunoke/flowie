@@ -84,7 +84,7 @@ export const command: Command = {
           embeds: [
             EmbedService.error(
               'Permissions insuffisantes',
-              `Le bot Flowie ne peut pas configurer le système de vérification car il lui manque les permissions suivantes :\n- ${missingPermissions.join(
+              `Le bot William ne peut pas configurer le système de vérification car il lui manque les permissions suivantes :\n- ${missingPermissions.join(
                 '\n- '
               )}\n\nVeuillez accorder ces permissions au bot et relancer la commande \`/verify setup\`.`
             ),

@@ -1,6 +1,6 @@
-# 🌲 Flowie — Discord Bot (Florynx Labs)
+# 👑 William — Discord Bot (Florynx Labs)
 
-**Flowie** est un bot Discord multifonction professionnel, distribué et hautement scalable développé par **Florynx Labs**. Construit sur des technologies modernes (**discord.js v14**, **TypeScript**, **Prisma/PostgreSQL**, **Redis**), Flowie est conçu pour fonctionner en tant que service central multi-processus (sharding) capable de gérer des milliers de serveurs en simultané.
+**William** est un bot Discord multifonction professionnel, distribué et hautement scalable développé par **Florynx Labs**. Construit sur des technologies modernes (**discord.js v14**, **TypeScript**, **Prisma/PostgreSQL**, **Redis**), William est conçu pour fonctionner en tant que service central multi-processus (sharding) capable de gérer des milliers de serveurs en simultané.
 
 ---
 
@@ -19,12 +19,12 @@
 
 ## 🛠️ Configuration & Fichier `config.json`
 
-En plus des variables d'environnement du fichier `.env`, Flowie utilise un fichier `config.json` à la racine pour la personnalisation globale :
+En plus des variables d'environnement du fichier `.env`, William utilise un fichier `config.json` à la racine pour la personnalisation globale :
 
 ```json
 {
   "embed": {
-    "footerText": "Flowie • Florynx Labs",
+    "footerText": "William • Florynx Labs",
     "footerIconUrl": "https://cdn.discordapp.com/embed/avatars/0.png"
   },
   "economy": {
@@ -52,7 +52,7 @@ pnpm install
 ```env
 DISCORD_TOKEN=votre_token_bot
 CLIENT_ID=votre_client_id
-DATABASE_URL="postgresql://user:pass@localhost:5432/flowie_db"
+DATABASE_URL="postgresql://william:william_password@localhost:5432/william_db"
 REDIS_URL="redis://localhost:6379"
 OWNER_ID=votre_id_discord
 OWNER_PREFIX=!!

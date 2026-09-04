@@ -14,7 +14,7 @@ import { TimeCapsuleService } from '../services/timeCapsuleService.js';
 export async function handleReady(client: Client) {
 
 
-  logger.info(`[ONLINE] Flowie is online! Logged in as ${client.user?.tag}`);
+  logger.info(`[ONLINE] William is online! Logged in as ${client.user?.tag}`);
 
   // Auto-deploy slash commands to Discord on ready
   if (config.token && config.token !== 'mock_discord_token_for_dev' && config.clientId) {

@@ -137,7 +137,7 @@ const birthdayCommand: Command = {
       const embed = EmbedService.create(
         `🎂 Prochains Anniversaires — ${interaction.guild.name}`,
         descriptionLines.join('\n')
-      ).setFooter({ text: `Page ${page}/${totalPages} • Flowie Anniversaires` });
+      ).setFooter({ text: `Page ${page}/${totalPages} • William Anniversaires` });
 
       await interaction.reply({ embeds: [embed] });
     }
