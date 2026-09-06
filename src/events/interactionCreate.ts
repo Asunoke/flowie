@@ -905,6 +905,14 @@ export async function handleInteractionCreate(
       return;
     }
 
+    if (interaction.isAutocomplete()) {
+      const command = commands.get(interaction.commandName);
+      if (command && typeof command.autocomplete === 'function') {
+        await command.autocomplete(interaction).catch(() => null);
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
 

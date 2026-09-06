@@ -9,7 +9,7 @@ import { Command } from '../../types/command.js';
 import { EmbedService } from '../../services/embedService.js';
 import { config } from '../../config/index.js';
 
-const HELP_IMAGE_URL = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60';
+const HELP_IMAGE_URL = 'https://media.discordapp.net/attachments/1409281654563803280/1532868082283053167/welcome-background.webp?ex=6a9be5e6&is=6a9a9466&hm=6357a5ee5fbadd33380f0f6ad66c73c18047410eabf063e11de45b4d9f3958e2&=&format=webp';
 
 export const command: Command = {
   data: new SlashCommandBuilder()
@@ -267,14 +267,60 @@ export const command: Command = {
           { name: '/config-report <#salon>', desc: 'Définir le salon de réception des signalements' },
         ],
       },
+      forge: {
+        title: '⚒️ Atelier de Forge Velcarius',
+        desc: 'Fusion et artisanat d objets de l inventaire en objets rares.',
+        icon: '⚒️',
+        commands: [
+          { name: '/forge craft <recette>', desc: 'Fabriquer un objet en combinant des composants' },
+          { name: '/forge recipes', desc: 'Consulter la liste des recettes accessibles' },
+          { name: '/forge recipe <nom>', desc: 'Afficher les composants requis et détails d une recette' },
+          { name: '/forge-admin create', desc: 'Créer une nouvelle recette de forge (Admin)' },
+          { name: '/forge-admin delete <recette>', desc: 'Supprimer une recette de forge (Admin)' },
+          { name: '/forge-admin stats', desc: 'Statistiques d utilisation de la forge (Admin)' },
+        ],
+      },
+      aura: {
+        title: '🌟 Aura & Réputation Sociale',
+        desc: 'Endorsements entre membres avec rôles dynamiques de palier.',
+        icon: '🌟',
+        commands: [
+          { name: '/aura endorse <membre> <qualite>', desc: 'Endorser un membre sur une qualité spécifique' },
+          { name: '/aura profile [membre]', desc: 'Consulter la carte d aura et le palier d un membre' },
+          { name: '/aura leaderboard [qualite]', desc: 'Classement général ou filtré par qualité' },
+          { name: '/config aura <actif>', desc: 'Activer ou désactiver le module Aura (Admin)' },
+          { name: '/config aura-qualities', desc: 'Gérer la liste des qualités d endorsement (Admin)' },
+          { name: '/config aura-tiers', desc: 'Gérer les paliers, couleurs et seuils de réputation (Admin)' },
+        ],
+      },
+      legacy: {
+        title: '🕊️ Legacy & Hommages au Départ',
+        desc: 'Hommages automatiques personnalisés pour le départ des membres significatifs.',
+        icon: '🕊️',
+        commands: [
+          { name: '/legacy-preview <membre>', desc: 'Prévisualiser l hommage de départ d un membre (Admin)' },
+          { name: '/config legacy <#salon>', desc: 'Définir le salon de publication des hommages (Admin)' },
+          { name: '/config legacy-criteria', desc: 'Ajuster les seuils d ancienneté, niveau et invites (Admin)' },
+        ],
+      },
+      pulse: {
+        title: '💓 Pulse & Activité en Temps Réel',
+        desc: 'Visualise l\'activité du serveur comme un pouls vivant avec comparaisons historiques.',
+        icon: '💓',
+        commands: [
+          { name: '/pulse now', desc: 'Affiche le pouls actuel (msgs/min, membres actifs, salon top, rythme \uD83D\uDC93 fort / \uD83E\uDEB5 modéré / 💤 faible)' },
+          { name: '/pulse history [période]', desc: 'Graphique textuel de l\'activité sur 24h ou 7 jours' },
+          { name: '/config pulse-alert', desc: 'Configurer les alertes automatiques de seuil d\'activité (Admin)' },
+        ],
+      },
     };
 
     // Main Overview Embed
     const mainEmbed = EmbedService.gold(
       '👑 Centre d Assistance William by Florynx Labs',
       'Bienvenue dans le menu d\'aide de **William** !\n' +
-        'Sélectionnez une catégorie dans le menu ci-dessous pour afficher les commandes disponibles et leurs détails.\n\n' +
-        '⚡ **Commandes phares** : `/setup`, `/config`, `/play`, `/roulette`, `/ticket-panel`, `/uptimer`, `/rank`'
+      'Sélectionnez une catégorie dans le menu ci-dessous pour afficher les commandes disponibles et leurs détails.\n\n' +
+      '⚡ **Commandes phares** : `/setup`, `/config`, `/play`, `/roulette`, `/ticket-panel`, `/uptimer`, `/rank`'
     )
       .setImage(HELP_IMAGE_URL)
       .setFooter({ text: `${config.bot.footer.text} • 21 modules disponibles` });
@@ -304,7 +350,11 @@ export const command: Command = {
         new StringSelectMenuOptionBuilder().setLabel('🎨 Créateur Embeds').setValue('embed').setDescription('Générateur d embeds personnalisés'),
         new StringSelectMenuOptionBuilder().setLabel('🔒 Vérification Captcha').setValue('verify').setDescription('Système anti-bot par Captcha/Bouton'),
         new StringSelectMenuOptionBuilder().setLabel('🔢 Comptage').setValue('counting').setDescription('Jeu de comptage collaboratif'),
-        new StringSelectMenuOptionBuilder().setLabel('🚨 Signalements').setValue('report').setDescription('Signalements discrets vers le staff')
+        new StringSelectMenuOptionBuilder().setLabel('🚨 Signalements').setValue('report').setDescription('Signalements discrets vers le staff'),
+        new StringSelectMenuOptionBuilder().setLabel('⚒️ Forge Velcarius').setValue('forge').setDescription('Artisanat et fusion d objets de l inventaire'),
+        new StringSelectMenuOptionBuilder().setLabel('🌟 Aura & Réputation').setValue('aura').setDescription('Endorsements et rôles dynamiques de réputation'),
+        new StringSelectMenuOptionBuilder().setLabel('🕊️ Legacy & Hommages').setValue('legacy').setDescription('Hommages de départ pour les membres importants'),
+        new StringSelectMenuOptionBuilder().setLabel('💓 Pulse & Activité').setValue('pulse').setDescription('Pouls du serveur en temps réel avec historique et alertes')
       );
 
     const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);

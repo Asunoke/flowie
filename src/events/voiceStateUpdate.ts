@@ -2,6 +2,7 @@ import { VoiceState, VoiceChannel } from 'discord.js';
 import { TempVoiceService } from '../services/tempVoiceService.js';
 import { logger } from '../utils/logger.js';
 import { EmbedService } from '../services/embedService.js';
+import { PulseService } from '../services/pulseService.js';
 
 export async function handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
   try {
@@ -48,6 +49,8 @@ export async function handleVoiceStateUpdate(oldState: VoiceState, newState: Voi
         // Cancel any pending deletion timer
         TempVoiceService.cancelChannelDeletion(joinedChannelId);
       }
+      // Pulse: track voice join as activity
+      PulseService.trackVoiceActivity(guild.id, member.id).catch(() => null);
     }
 
     // ── 3. Member left a voice channel ──────────────────────────────────────────

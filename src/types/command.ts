@@ -38,6 +38,10 @@ export interface Command {
     | 'notify'
     | 'timecapsule'
     | 'report'
+    | 'forge'
+    | 'aura'
+    | 'legacy'
+    | 'pulse'
     | 'community';
 
 
@@ -45,6 +49,7 @@ export interface Command {
   botPermissions?: PermissionResolvable[];
   cooldown?: number; // seconds
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+  autocomplete?: (interaction: any) => Promise<void>;
 }
 
 export interface ContextMenuCommand {
@@ -72,6 +77,10 @@ export interface ContextMenuCommand {
     | 'notify'
     | 'timecapsule'
     | 'report'
+    | 'forge'
+    | 'aura'
+    | 'legacy'
+    | 'pulse'
     | 'community';
 
   userPermissions?: PermissionResolvable[];

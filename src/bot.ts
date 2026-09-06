@@ -9,6 +9,7 @@ import { handleMessageCreate } from './events/messageCreate.js';
 import { handlePresenceUpdate } from './events/presenceUpdate.js';
 import { handleGuildMemberAdd } from './events/guildMemberAdd.js';
 import { handleGuildMemberRemove } from './events/guildMemberRemove.js';
+import { handleGuildMemberUpdate } from './events/guildMemberUpdate.js';
 import { handleGuildCreate } from './events/guildCreate.js';
 import { handleGuildDelete } from './events/guildDelete.js';
 import { handleChannelDelete } from './events/channelDelete.js';
@@ -75,6 +76,7 @@ async function main() {
   );
   client.on('guildMemberAdd', (member) => handleGuildMemberAdd(member));
   client.on('guildMemberRemove', (member) => handleGuildMemberRemove(member));
+  client.on('guildMemberUpdate', (oldMember, newMember) => handleGuildMemberUpdate(oldMember, newMember));
   client.on('guildCreate', (guild) => handleGuildCreate(guild));
   client.on('guildDelete', (guild) => handleGuildDelete(guild));
   client.on('channelDelete', (channel) => handleChannelDelete(channel));

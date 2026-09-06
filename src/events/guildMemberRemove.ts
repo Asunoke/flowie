@@ -4,11 +4,12 @@ import { WelcomeCardService } from '../services/welcomeCardService.js';
 import { EmbedService } from '../services/embedService.js';
 import { prisma } from '../database/db.js';
 import { InviteService } from '../services/inviteService.js';
+import { LegacyService } from '../services/legacyService.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 
 /**
- * Handles guildMemberRemove for Uptimer, Leave System, and Invite Tracking (left early check).
+ * Handles guildMemberRemove for Uptimer, Leave System, Legacy Tribute, and Invite Tracking.
  */
 export async function handleGuildMemberRemove(member: GuildMember | PartialGuildMember) {
   try {
@@ -16,6 +17,9 @@ export async function handleGuildMemberRemove(member: GuildMember | PartialGuild
 
     // 0. Invite Tracking (Check if member left < 10 mins after joining)
     await InviteService.trackMemberLeave(guildId, member.id);
+
+    // 0b. Legacy Tribute Hommage
+    await LegacyService.handleMemberLeave(member);
 
     // 1. Leave System Message & Banner Card
     try {

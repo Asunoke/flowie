@@ -12,6 +12,7 @@ import { BlacklistService } from '../services/blacklistService.js';
 import { handleOwnerCommand } from '../owner-commands/ownerHandler.js';
 import { CountingService } from '../services/countingService.js';
 import { LevelingService } from '../services/levelingService.js';
+import { PulseService } from '../services/pulseService.js';
 
 export async function handleMessageCreate(message: Message) {
   if (message.author.bot) return;
@@ -36,6 +37,9 @@ export async function handleMessageCreate(message: Message) {
   if (message.member) {
     LevelingService.handleMessageXP(message.guild.id, message.member, message.channel.id).catch(() => null);
   }
+
+  // Pulse: non-blocking real-time activity tracking
+  PulseService.trackMessage(message.guild.id, message.channel.id, message.author.id).catch(() => null);
 
   // WordChain Live Validation Handler
   const session = wordChainSessions.get(message.channel.id);

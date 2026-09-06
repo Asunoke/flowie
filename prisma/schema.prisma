@@ -46,6 +46,19 @@ model Guild {
   tickets            Ticket[]
   moderationCases    ModerationCase[]
   timeCapsules       TimeCapsule[]
+  forgeVisibility    String   @default("discovered") // "discovered" | "all"
+  forgeRecipes       ForgeRecipe[]
+  forgeLogs          ForgeLog[]
+  auraEnabled            Boolean       @default(true)
+  auraDailyLimit         Int           @default(5)
+  auraPairCooldownHours  Int           @default(24)
+  endorsements           Endorsement[]
+  auraQualities          AuraQuality[]
+  auraTiers              AuraTier[]
+  staffHistory           StaffHistory[]
+  legacySettings         LegacySettings?
+  activitySnapshots      ActivitySnapshot[]
+  pulseAlertSettings     PulseAlertSettings?
 
   @@index([ownerUserId, isLocked])
   @@map("guilds")
@@ -148,6 +161,8 @@ model ShopItem {
 
   guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
   inventories InventoryItem[]
+  asForgeResult ForgeRecipe[] @relation("ForgeRecipeResult")
+  asForgeIngredient ForgeIngredient[] @relation("ForgeIngredientItem")
 
   @@map("shop_items")
 }
@@ -564,4 +579,148 @@ model TimeCapsule {
 
   @@index([guildId, opened])
   @@map("time_capsules")
+}
+
+model ForgeRecipe {
+  id            String            @id @default(cuid())
+  guildId       String
+  name          String
+  resultItemId  String
+  successRate   Int               @default(100)
+  lossType      String            @default("total") // "total" | "partial"
+  createdBy     String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  guild         Guild             @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  resultItem    ShopItem          @relation("ForgeRecipeResult", fields: [resultItemId], references: [id], onDelete: Cascade)
+  ingredients   ForgeIngredient[]
+  logs          ForgeLog[]
+
+  @@unique([guildId, name])
+  @@index([guildId])
+  @@map("forge_recipes")
+}
+
+model ForgeIngredient {
+  id         String      @id @default(cuid())
+  recipeId   String
+  itemId     String
+  quantity   Int         @default(1)
+
+  recipe     ForgeRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  shopItem   ShopItem    @relation("ForgeIngredientItem", fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, itemId])
+  @@map("forge_ingredients")
+}
+
+model ForgeLog {
+  id         String       @id @default(cuid())
+  guildId    String
+  userId     String
+  recipeId   String?
+  success    Boolean
+  createdAt  DateTime     @default(now())
+
+  guild      Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  recipe     ForgeRecipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+
+  @@index([guildId, userId])
+  @@index([guildId, recipeId])
+  @@map("forge_logs")
+}
+
+model Endorsement {
+  id          String   @id @default(cuid())
+  guildId     String
+  fromUserId  String
+  toUserId    String
+  quality     String
+  createdAt   DateTime @default(now())
+
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, toUserId])
+  @@index([guildId, fromUserId, toUserId])
+  @@map("endorsements")
+}
+
+model AuraQuality {
+  id      String @id @default(cuid())
+  guildId String
+  name    String
+
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([guildId, name])
+  @@map("aura_qualities")
+}
+
+model AuraTier {
+  id        String   @id @default(cuid())
+  guildId   String
+  name      String
+  minScore  Int
+  colorHex  String   @default("#3B82F6")
+  roleId    String?
+
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([guildId, minScore])
+  @@unique([guildId, name])
+  @@map("aura_tiers")
+}
+
+model StaffHistory {
+  id        String    @id @default(cuid())
+  guildId   String
+  userId    String
+  roleName  String
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, userId])
+  @@map("staff_history")
+}
+
+model LegacySettings {
+  guildId          String   @id
+  channelId        String?
+  minTenureDays    Int      @default(90)
+  minLevel         Int?     @default(10)
+  minInvites       Int?     @default(5)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  guild            Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@map("legacy_settings")
+}
+
+model ActivitySnapshot {
+  id            String   @id @default(cuid())
+  guildId       String
+  hourBucket    DateTime // heure arrondie à l'heure
+  messageCount  Int
+  activeMembers Int
+  topChannelId  String?
+
+  guild         Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, hourBucket])
+  @@map("activity_snapshots")
+}
+
+model PulseAlertSettings {
+  guildId       String  @id
+  channelId     String?
+  lowThreshold  Int?
+  highThreshold Int?
+
+  guild         Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@map("pulse_alert_settings")
 }

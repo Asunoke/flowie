@@ -4,6 +4,9 @@ import { prisma } from '../../database/db.js';
 import { EmbedService } from '../../services/embedService.js';
 import { GuildConfigService } from '../../services/guildConfigService.js';
 import { getMusicSettings } from '../../services/musicService.js';
+import { AuraService } from '../../services/auraService.js';
+import { LegacyService } from '../../services/legacyService.js';
+import { PulseService } from '../../services/pulseService.js';
 
 export const command: Command = {
   data: new SlashCommandBuilder()
@@ -125,6 +128,109 @@ export const command: Command = {
             .setDescription('Salon d annonce')
             .addChannelTypes(ChannelType.GuildText)
             .setRequired(true)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('forge-visibility')
+        .setDescription('Mode d affichage des recettes de forge pour les membres')
+        .addStringOption((opt) =>
+          opt
+            .setName('mode')
+            .setDescription('Visibilité des recettes')
+            .setRequired(true)
+            .addChoices(
+              { name: 'Découvertes (nécessite d avoir au moins 1 composant dans l inventaire)', value: 'discovered' },
+              { name: 'Publiques (toutes les recettes sont visibles par tous les membres)', value: 'all' }
+            )
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('aura')
+        .setDescription('Activer ou désactiver le module Aura sur le serveur')
+        .addBooleanOption((opt) => opt.setName('actif').setDescription('Activer l Aura').setRequired(true))
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('aura-qualities')
+        .setDescription('Gérer les qualités d endorsement (ex: Fiable, Créatif...)')
+        .addStringOption((opt) =>
+          opt
+            .setName('action')
+            .setDescription('Action à effectuer')
+            .setRequired(true)
+            .addChoices(
+              { name: 'Voir les qualités', value: 'list' },
+              { name: 'Ajouter une qualité', value: 'add' },
+              { name: 'Retirer une qualité', value: 'remove' }
+            )
+        )
+        .addStringOption((opt) => opt.setName('nom').setDescription('Nom de la qualité (si ajout/retrait)'))
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('aura-tiers')
+        .setDescription('Gérer les paliers d aura et couleurs associées')
+        .addStringOption((opt) =>
+          opt
+            .setName('action')
+            .setDescription('Action à effectuer')
+            .setRequired(true)
+            .addChoices(
+              { name: 'Voir les paliers', value: 'list' },
+              { name: 'Ajouter/Modifier un palier', value: 'add' },
+              { name: 'Retirer un palier', value: 'remove' }
+            )
+        )
+        .addStringOption((opt) => opt.setName('nom').setDescription('Nom du palier (ex: Éclat)'))
+        .addIntegerOption((opt) => opt.setName('score_min').setDescription('Score minimum requis').setMinValue(0))
+        .addStringOption((opt) => opt.setName('couleur_hex').setDescription('Code couleur Hex (ex: #3B82F6)'))
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('legacy')
+        .setDescription('Définir le salon de publication des hommages de départ des membres')
+        .addChannelOption((opt) =>
+          opt
+            .setName('salon')
+            .setDescription('Le salon des hommages')
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('legacy-criteria')
+        .setDescription('Ajuster les critères d éligibilité d hommage au départ')
+        .addIntegerOption((opt) => opt.setName('anciennete_jours').setDescription('Ancienneté min en jours (défaut: 90)').setMinValue(1))
+        .addIntegerOption((opt) => opt.setName('niveau_min').setDescription('Niveau d XP min (défaut: 10)').setMinValue(1))
+        .addIntegerOption((opt) => opt.setName('invites_min').setDescription('Nombre d invites min (défaut: 5)').setMinValue(1))
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('pulse-alert')
+        .setDescription('Configurer les alertes automatiques d activité Pulse pour ce serveur')
+        .addChannelOption((opt) =>
+          opt
+            .setName('salon')
+            .setDescription('Salon où envoyer les alertes Pulse')
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(true)
+        )
+        .addIntegerOption((opt) =>
+          opt
+            .setName('seuil_bas')
+            .setDescription('Seuil bas : alerte si msgs/h < cette valeur (0 = désactivé)')
+            .setMinValue(0)
+            .setRequired(false)
+        )
+        .addIntegerOption((opt) =>
+          opt
+            .setName('seuil_haut')
+            .setDescription('Seuil haut : alerte si msgs/h > cette valeur (0 = désactivé)')
+            .setMinValue(0)
+            .setRequired(false)
         )
     ),
   category: 'management',
@@ -321,6 +427,265 @@ export const command: Command = {
       await interaction.reply({
         embeds: [EmbedService.success('Configuration mise à jour', `Le salon d annonce des capsules temporelles a été défini sur ${channel}.`)],
       });
+      return;
+    }
+
+    if (subcommand === 'forge-visibility') {
+      const mode = interaction.options.getString('mode', true) as 'discovered' | 'all';
+      await prisma.guild.update({
+        where: { id: interaction.guild.id },
+        data: { forgeVisibility: mode },
+      });
+      await GuildConfigService.invalidateGuildConfig(interaction.guild.id);
+      await interaction.reply({
+        embeds: [
+          EmbedService.success(
+            'Visibilité de la Forge Mise à Jour',
+            `Le mode d affichage des recettes de la forge a été réglé sur : **${mode === 'discovered' ? 'Découvertes (1+ composant requis)' : 'Publiques (Toutes les recettes visibles)'}**.`
+          ),
+        ],
+      });
+      return;
+    }
+
+    if (subcommand === 'aura') {
+      const active = interaction.options.getBoolean('actif', true);
+      await prisma.guild.update({
+        where: { id: interaction.guild.id },
+        data: { auraEnabled: active },
+      });
+      await GuildConfigService.invalidateGuildConfig(interaction.guild.id);
+      await interaction.reply({
+        embeds: [
+          EmbedService.success(
+            'Module Aura',
+            `Le système d endorsement d Aura est désormais : **${active ? 'Activé' : 'Désactivé'}**.`
+          ),
+        ],
+      });
+      return;
+    }
+
+    if (subcommand === 'aura-qualities') {
+      const action = interaction.options.getString('action', true);
+      const name = interaction.options.getString('nom')?.trim();
+
+      if (action === 'list') {
+        const qualities = await AuraService.getQualities(interaction.guild.id);
+        const embed = EmbedService.gold(
+          `✨ Qualités d Aura — ${interaction.guild.name}`,
+          `Qualités d endorsement disponibles sur ce serveur (${qualities.length}) :\n\n` +
+            qualities.map((q) => `• **${q}**`).join('\n')
+        );
+        await interaction.reply({ embeds: [embed] });
+        return;
+      }
+
+      if (action === 'add') {
+        if (!name) {
+          await interaction.reply({
+            embeds: [EmbedService.error('Paramètre Manquant', 'Veuillez spécifier le nom de la qualité à ajouter.')],
+            ephemeral: true,
+          });
+          return;
+        }
+
+        await prisma.auraQuality.upsert({
+          where: { guildId_name: { guildId: interaction.guild.id, name } },
+          create: { guildId: interaction.guild.id, name },
+          update: {},
+        });
+
+        await interaction.reply({
+          embeds: [EmbedService.success('Qualité Ajoutée', `La qualité **${name}** a été ajoutée au système d Aura.`)],
+        });
+        return;
+      }
+
+      if (action === 'remove') {
+        if (!name) {
+          await interaction.reply({
+            embeds: [EmbedService.error('Paramètre Manquant', 'Veuillez spécifier le nom de la qualité à retirer.')],
+            ephemeral: true,
+          });
+          return;
+        }
+
+        const existing = await prisma.auraQuality.findUnique({
+          where: { guildId_name: { guildId: interaction.guild.id, name } },
+        });
+
+        if (!existing) {
+          await interaction.reply({
+            embeds: [EmbedService.error('Qualité Introuvable', `La qualité \`${name}\` n existe pas.`)],
+            ephemeral: true,
+          });
+          return;
+        }
+
+        await prisma.auraQuality.delete({ where: { id: existing.id } });
+
+        await interaction.reply({
+          embeds: [EmbedService.success('Qualité Retirée', `La qualité **${name}** a été retirée du serveur.`)],
+        });
+        return;
+      }
+    }
+
+    if (subcommand === 'aura-tiers') {
+      const action = interaction.options.getString('action', true);
+      const name = interaction.options.getString('nom')?.trim();
+      const minScore = interaction.options.getInteger('score_min');
+      const colorHex = interaction.options.getString('couleur_hex')?.trim();
+
+      if (action === 'list') {
+        const tiers = await AuraService.getTiers(interaction.guild.id);
+        const embed = EmbedService.gold(
+          `🏅 Paliers d Aura — ${interaction.guild.name}`,
+          'Paliers de réputation et rôles dynamiques associés :'
+        );
+
+        for (const t of tiers) {
+          embed.addFields({
+            name: `🏅 ${t.name} (Seuil: ${t.minScore} pts)`,
+            value: `• **Couleur Hex** : \`${t.colorHex}\`\n• **Rôle Discord** : ${t.roleId ? `<@&${t.roleId}>` : '`Généré automatiquement lors du 1er franchissement`'}`,
+          });
+        }
+
+        await interaction.reply({ embeds: [embed] });
+        return;
+      }
+
+      if (action === 'add') {
+        if (!name || minScore === null || minScore === undefined) {
+          await interaction.reply({
+            embeds: [EmbedService.error('Paramètres Manquants', 'Veuillez spécifier le nom du palier et le score minimum requis.')],
+            ephemeral: true,
+          });
+          return;
+        }
+
+        const hex = colorHex && /^#[0-9A-F]{6}$/i.test(colorHex) ? colorHex : '#3B82F6';
+
+        await prisma.auraTier.upsert({
+          where: { guildId_name: { guildId: interaction.guild.id, name } },
+          create: {
+            guildId: interaction.guild.id,
+            name,
+            minScore,
+            colorHex: hex,
+          },
+          update: {
+            minScore,
+            colorHex: hex,
+          },
+        });
+
+        await interaction.reply({
+          embeds: [
+            EmbedService.success(
+              'Palier d Aura Configuré',
+              `Le palier **${name}** (\`${minScore} pts\`) a été enregistré avec la couleur \`${hex}\`.`
+            ),
+          ],
+        });
+        return;
+      }
+
+      if (action === 'remove') {
+        if (!name) {
+          await interaction.reply({
+            embeds: [EmbedService.error('Paramètre Manquant', 'Veuillez spécifier le nom du palier à retirer.')],
+            ephemeral: true,
+          });
+          return;
+        }
+
+        const existing = await prisma.auraTier.findUnique({
+          where: { guildId_name: { guildId: interaction.guild.id, name } },
+        });
+
+        if (!existing) {
+          await interaction.reply({
+            embeds: [EmbedService.error('Palier Introuvable', `Le palier \`${name}\` n existe pas.`)],
+            ephemeral: true,
+          });
+          return;
+        }
+
+        await prisma.auraTier.delete({ where: { id: existing.id } });
+
+        await interaction.reply({
+          embeds: [EmbedService.success('Palier Retiré', `Le palier **${name}** a été supprimé.`)],
+        });
+        return;
+      }
+    }
+
+    if (subcommand === 'legacy') {
+      const channel = interaction.options.getChannel('salon', true);
+      await LegacyService.updateSettings(interaction.guild.id, {
+        channelId: channel.id,
+      });
+      await interaction.reply({
+        embeds: [EmbedService.success('Salon des Hommages Configuré', `Les hommages de départ seront désormais publiés dans ${channel}.`)],
+      });
+      return;
+    }
+
+    if (subcommand === 'legacy-criteria') {
+      const tenure = interaction.options.getInteger('anciennete_jours');
+      const level = interaction.options.getInteger('niveau_min');
+      const invites = interaction.options.getInteger('invites_min');
+
+      const current = await LegacyService.getSettings(interaction.guild.id);
+
+      const updated = await LegacyService.updateSettings(interaction.guild.id, {
+        minTenureDays: tenure ?? current.minTenureDays,
+        minLevel: level !== null ? level : current.minLevel,
+        minInvites: invites !== null ? invites : current.minInvites,
+      });
+
+      const embed = EmbedService.success(
+        '🕊️ Critères Legacy Mis à Jour',
+        'Les seuils d éligibilité aux hommages de départ ont été configurés :'
+      ).addFields(
+        { name: '⏳ Ancienneté Minimum', value: `\`${updated.minTenureDays} jours\``, inline: true },
+        { name: '⭐ Niveau XP Minimum', value: updated.minLevel !== null ? `\`Niveau ${updated.minLevel}\`` : '`Désactivé`', inline: true },
+        { name: '✉️ Invitations Minimum', value: updated.minInvites !== null ? `\`${updated.minInvites} membres\`` : '`Désactivé`', inline: true }
+      );
+
+      await interaction.reply({ embeds: [embed] });
+      return;
+    }
+
+    if (subcommand === 'pulse-alert') {
+      const channel = interaction.options.getChannel('salon', true);
+      const seuilBas = interaction.options.getInteger('seuil_bas');
+      const seuilHaut = interaction.options.getInteger('seuil_haut');
+
+      const low = seuilBas !== null && seuilBas > 0 ? seuilBas : null;
+      const high = seuilHaut !== null && seuilHaut > 0 ? seuilHaut : null;
+
+      await PulseService.updateAlertSettings(interaction.guild.id, channel.id, low, high);
+
+      const embed = EmbedService.success(
+        '💓 Alertes Pulse Configurées',
+        `Les alertes d'activité seront envoyées dans ${channel}.`
+      ).addFields(
+        {
+          name: '💤 Seuil Bas (activité trop faible)',
+          value: low !== null ? `\`< ${low} msgs/h\`` : '`Désactivé`',
+          inline: true,
+        },
+        {
+          name: '💓 Seuil Haut (activité trop élevée)',
+          value: high !== null ? `\`> ${high} msgs/h\`` : '`Désactivé`',
+          inline: true,
+        }
+      );
+
+      await interaction.reply({ embeds: [embed] });
       return;
     }
   },

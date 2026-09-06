@@ -10,6 +10,7 @@ import { InviteService } from '../services/inviteService.js';
 import { StreamNotifyService } from '../services/streamNotifyService.js';
 import { BirthdayService } from '../services/birthdayService.js';
 import { TimeCapsuleService } from '../services/timeCapsuleService.js';
+import { PulseService } from '../services/pulseService.js';
 
 export async function handleReady(client: Client) {
 
@@ -65,6 +66,9 @@ export async function handleReady(client: Client) {
     await InviteService.cacheGuildInvites(guild);
   }
   InviteService.startPeriodicRefresh(client);
+
+  // Initialize Pulse activity tracking and aggregation scheduler
+  PulseService.init(client).catch((err) => logger.error({ err }, '[PULSE] Failed to initialize Pulse service'));
 
   client.user?.setActivity(`${config.bot.signature} | /help`, {
     type: ActivityType.Watching,
