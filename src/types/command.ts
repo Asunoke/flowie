@@ -42,7 +42,8 @@ export interface Command {
     | 'aura'
     | 'legacy'
     | 'pulse'
-    | 'community';
+    | 'community'
+    | 'circuit';
 
 
   userPermissions?: PermissionResolvable[];
@@ -81,7 +82,8 @@ export interface ContextMenuCommand {
     | 'aura'
     | 'legacy'
     | 'pulse'
-    | 'community';
+    | 'community'
+    | 'circuit';
 
   userPermissions?: PermissionResolvable[];
   cooldown?: number;

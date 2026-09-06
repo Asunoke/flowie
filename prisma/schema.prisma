@@ -724,3 +724,15 @@ model PulseAlertSettings {
 
   @@map("pulse_alert_settings")
 }
+
+model CircuitReport {
+  id          String   @id @default(cuid())
+  guildId     String
+  healthScore Int
+  findings    Json     // liste structurée des problèmes détectés avec sévérité
+  scannedAt   DateTime @default(now())
+
+  @@index([guildId, scannedAt])
+  @@map("circuit_reports")
+}
+
