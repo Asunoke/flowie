@@ -17,30 +17,8 @@ export async function handleReady(client: Client) {
 
   logger.info(`[ONLINE] William is online! Logged in as ${client.user?.tag}`);
 
-  // Auto-deploy slash commands to Discord on ready
-  if (config.token && config.token !== 'mock_discord_token_for_dev' && config.clientId) {
-    try {
-      const commandsCollection = await loadCommands();
-      const commandsData = Array.from(commandsCollection.values()).map((cmd) => cmd.data.toJSON());
-      const rest = new REST({ version: '10' }).setToken(config.token);
-
-      if (config.guildId) {
-        await rest.put(
-          Routes.applicationGuildCommands(config.clientId, config.guildId),
-          { body: commandsData }
-        );
-        logger.info(`[DISCORD] Successfully auto-deployed ${commandsData.length} commands to guild ${config.guildId}!`);
-      } else {
-        await rest.put(
-          Routes.applicationCommands(config.clientId),
-          { body: commandsData }
-        );
-        logger.info(`[DISCORD] Successfully auto-deployed ${commandsData.length} commands globally!`);
-      }
-    } catch (deployErr) {
-      logger.error({ err: deployErr }, '[DISCORD] Failed to auto-deploy commands');
-    }
-  }
+  // Slash commands are deployed via 'pnpm deploy:commands' to prevent API rate limits & console log spam on startup
+  logger.info('[DISCORD] Slash commands ready (use "pnpm deploy:commands" to sync with Discord API)');
 
   // Restore active giveaways from DB
   await GiveawayService.restoreGiveaways(client);
